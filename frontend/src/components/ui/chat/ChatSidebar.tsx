@@ -35,7 +35,8 @@ const ChatSidebar = () => {
   const router = useRouter();
   const {user,logout} = userAuthStore();
   const {chats,fetchChats,createChat,deleteChat,isChatLoading,isLoading} = useChatStore();
-
+const currentChatId = pathname.startsWith("/chat/") ? pathname.split("/chat/")[1] : null;
+const currentChat = chats.find((chat: any) => chat._id === currentChatId);
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -268,6 +269,7 @@ const ChatSidebar = () => {
       </div>
     </div>
   );
+  
 
   return (
     <>
@@ -285,8 +287,8 @@ const ChatSidebar = () => {
           <SidebarContent />
         </SheetContent>
       </Sheet>
-    <div className="text-2xl font-semibold text-gray-700 mx-auto">
-          Chatgpt
+    <div className="text-1xl font-semibold text-gray-900 mx-auto">
+         {currentChat ? currentChat.title : "Chatgpt"}
         </div>
         <div className="w-10" />
       </div>
