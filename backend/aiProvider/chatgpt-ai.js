@@ -4,46 +4,48 @@ const https = require("https");
 const DEFAULT_SYSTEM_MESSAGE =
   "You are ChatGpt, a helpful AI assistant. You provide accurate, informative, and friendly responses. Always be respectful, helpful, and concise in your responses. After your first message, also include a suitable chat title (in 3-8 words) in the format: [TITLE: Your generated title here].";
 
-async function generateStreamResponse(messages, onChunk) {
-  if (!messages.some((msg) => msg.role === "system")) {
-    messages = [{ role: "system", content: DEFAULT_SYSTEM_MESSAGE }, ...messages];
-  }
+// 🧠 List of fallback models in order of preference (all free/available on OpenRouter)
+const FALLBACK_MODELS = [
+  "openchat/openchat-3.5-0106",
+  "mistralai/mistral-7b-instruct",
+  "meta-llama/llama-3-8b-instruct",
+  "gryphe/mythomax-l2-13b"
+];
 
-  try {
-    const response = await axios.post(
-      "https://openrouter.ai/api/v1/chat/completions",
-      {
-        model: "anthropic/claude-3-sonnet",
-        messages,
-        max_tokens: 300,
-        stream: true,
-      },
-      {
-        responseType: "stream",
-        headers: {
-          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-          "HTTP-Referer": "http://localhost:3000",
-          "X-Title": "ChatGPT Clone",
-          "Content-Type": "application/json",
+async function tryModel(model, messages, onChunk) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const response = await axios.post(
+        "https://openrouter.ai/api/v1/chat/completions",
+        {
+          model,
+          messages,
+          // max_tokens: 512,
+          stream: true,
         },
-        httpsAgent: new https.Agent({ keepAlive: true }),
-      }
-    );
+        {
+          responseType: "stream",
+          headers: {
+            Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+            "HTTP-Referer": "http://localhost:3000",
+            "X-Title": "ChatGPT Clone",
+            "Content-Type": "application/json",
+          },
+          httpsAgent: new https.Agent({ keepAlive: true }),
+        }
+      );
 
-    let fullResponse = "";
+      let fullResponse = "";
 
-    return new Promise((resolve, reject) => {
       response.data.on("data", (chunk) => {
         const lines = chunk.toString().split("\n").filter((line) => line.trim() !== "");
 
         for (const line of lines) {
           if (line.startsWith("data:")) {
             const dataStr = line.replace(/^data:\s*/, "");
-
             if (dataStr === "[DONE]") {
               const titleMatch = fullResponse.match(/\[TITLE:\s*(.*?)\]/i);
               const cleanResponse = fullResponse.replace(/\[TITLE:\s*(.*?)\]/i, "").trim();
-
               resolve({ fullResponse: cleanResponse, title: titleMatch?.[1]?.trim() || null });
               return;
             }
@@ -69,19 +71,33 @@ async function generateStreamResponse(messages, onChunk) {
         resolve({ fullResponse: cleanResponse, title: titleMatch?.[1]?.trim() || null });
       });
 
-      response.data.on("error", (err) => {
-        reject(err);
-      });
-    });
-  } catch (error) {
-    console.error("Error in OpenRouter provider:", error.response?.data || error.message);
-    throw new Error("OpenRouter error: " + (error.response?.data?.error?.message || error.message));
+      response.data.on("error", (err) => reject(err));
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+
+async function generateStreamResponse(messages, onChunk) {
+  if (!messages.some((msg) => msg.role === "system")) {
+    messages = [{ role: "system", content: DEFAULT_SYSTEM_MESSAGE }, ...messages];
   }
+
+  for (const model of FALLBACK_MODELS) {
+    try {
+      console.log(`🔄 Trying model: ${model}`);
+      const result = await tryModel(model, messages, onChunk);
+      console.log(`✅ Model success: ${model}`);
+      return result;
+    } catch (err) {
+      console.warn(`⚠️ Model failed: ${model}`, err.response?.data?.error || err.message);
+    }
+  }
+
+  throw new Error("All fallback models failed or rate-limited. Try again later.");
 }
 
 module.exports = { generateStreamResponse };
-
-
 
 
 
