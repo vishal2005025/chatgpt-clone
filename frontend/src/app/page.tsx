@@ -2,21 +2,29 @@
 import ChatSidebar from "@/components/ui/chat/ChatSidebar";
 import ChatInput from "@/components/ui/chat/ChatInput";
 import Image from "next/image";
+import { userAuthStore } from "@/store/authStore";
+import { useChatStore } from "@/store/chatStore";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+
 
 export default function Home() {
-  const isLoading = false;
-   const handleSendMesaage = async (message: string) => {
-    // if (isAuthenticated && !createChatLoading) {
-    //   try {
-    //     const chat = await createChat("New Chat");
-    //     router.push(
-    //       `/chat/${chat?._id}?message=${encodeURIComponent(message)}`
-    //     );
-    //   } catch (error) {
-    //     console.log(error);
-    //     toast.error("failed to create chat");
-    //   }
-    // }
+
+   const { isAuthenticated, isLoading } = userAuthStore();
+  const { createChat, isLoading: createChatLoading } = useChatStore();
+  const router = useRouter();
+  const handleSendMesaage = async (message: string) => {
+    if (isAuthenticated && !createChatLoading) {
+      try {
+        const chat = await createChat("New Chat");
+        router.push(
+          `/chat/${chat?._id}?message=${encodeURIComponent(message)}`
+        );
+      } catch (error) {
+        console.log(error);
+        toast.error("failed to create chat");
+      }
+    }
   };
   return (
     <div className="flex h-screen">
@@ -27,7 +35,7 @@ export default function Home() {
             <div className="h-16 w-16">
               <img
                 src="/images/chatgpt-small-logo.svg"
-                alt="deepsee-logo"
+                alt="chatgpt-logo"
                 className="h-full w-full"
               />
             </div>
@@ -38,7 +46,7 @@ export default function Home() {
           </p>
         </div>
         <div className=" mt-11 left-0 top-30 right-0 bottom-0 mx-auto flex px-4 justify-center items-center">
-          <ChatInput isLoading={isLoading}/>
+          <ChatInput onSubmit={handleSendMesaage} isLoading={isLoading}/>
         </div>
       </div>
     </div>

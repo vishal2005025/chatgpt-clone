@@ -50,7 +50,7 @@ const ChatInput = ({ onSubmit, isLoading }: ChatInputProps) => {
 
 
   return (
-     <div className="w-3xl max-w-4xl md:ml-64 py-4 px-4 rounded-xl shadow-[0_-1px_6px_rgba(0,0,0,0.05)] flex flex-col justify-end border ">
+     <div className="w-3xl max-w-4xl md:ml-64 py-4 px-4 bg-white rounded-xl shadow-[0_-1px_6px_rgba(0,0,0,0.05)] flex flex-col justify-end border ">
     <form onSubmit={handleSubmit} className="w-full flex flex-col">
       <Textarea
         ref={textareaRef}
@@ -109,7 +109,7 @@ const ChatInput = ({ onSubmit, isLoading }: ChatInputProps) => {
               disabled={isLoading || !input.trim()}
               className={cn(
                 "bg-gray-900 text-white h-9 w-9 p-2 rounded-md ",
-                !input.trim() && "opacity-50 cursor-not-allowed"
+                 input.trim() && !isLoading ? "cursor-pointer" : "opacity-50 cursor-not-allowed"
               )}
             >
               <Send className="h-5 w-5 " />

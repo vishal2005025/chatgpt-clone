@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import toast from "react-hot-toast";
+import { userAuthStore } from "@/store/authStore";
 
 const page = () => {
 
@@ -15,7 +17,26 @@ const page = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
-  const isLoading = false;
+  const {isLoading,login} = userAuthStore();
+
+   const handleSubmit =  async(e:React.FormEvent) => {
+    e.preventDefault();
+    try {
+        await login(email,password)
+        toast.success("user login successfully")
+        router.push('/')
+    } catch (error:any) {
+      console.log(error)
+      toast.error(error || "error during login")
+    }
+  }
+
+  
+  const handleGoogleLogin = () => {
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`
+  }
+
+
   return (
    <div className="flex flex-col min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
       <div className="flex justify-center mb-12">
@@ -35,7 +56,7 @@ const page = () => {
         </CardHeader>
 
         <CardContent>
-          <form  className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <div className="relative">
                 <Input
@@ -121,7 +142,7 @@ const page = () => {
               <span className="bg-white px-2 text-gray-500">OR</span>
             </div>
           </div>
-          <Button variant="outline" className="mt-6 w-full hover:bg-gray-100 hover:border-gray-400 transition-colors " >
+          <Button variant="outline" className="mt-6 w-full hover:bg-gray-100 hover:border-gray-400 transition-colors " onClick={handleGoogleLogin}>
             <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
               <path
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"

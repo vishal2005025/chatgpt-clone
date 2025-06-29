@@ -14,6 +14,9 @@ import { SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '../sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar';
 import { profile } from 'console';
+import { useChatStore } from "@/store/chatStore";
+import { userAuthStore } from "@/store/authStore";
+import toast from "react-hot-toast";
 
 
 interface Chat {
@@ -30,24 +33,16 @@ interface SidebarSectionProps {
 const ChatSidebar = () => {
   const pathname = usePathname();
   const router = useRouter();
-  // const {user,logout} = userAuthStore();
-  // const {chats,fetchChats,createChat,deleteChat,isChatLoading,isLoading} = useChatStore()
-const chats =[{
-  _id:'djkbwd'
-}];
+  const {user,logout} = userAuthStore();
+  const {chats,fetchChats,createChat,deleteChat,isChatLoading,isLoading} = useChatStore();
 
-  const user = {
-    name: "Vishal Malyan",
-    profilePicture: "",
-    email: "vishalmalyan2005@gmail.com"
-  }
+
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const isChatLoading = false; // Replace with actual loading state from your chat store
 
 
-  // useEffect(() => {
-  //   fetchChats()
-  // },[fetchChats])
+  useEffect(() => {
+    fetchChats()
+  },[fetchChats])
 
   const todayChats: Chat[] = [];
   const yesterdayChats: Chat[] = [];
@@ -70,9 +65,40 @@ const chats =[{
     }
   });
 
-   const handleLogout = () =>{
-    
+  const handleCreateChat = async() => {
+    try {
+      const chat = await createChat("New Chat");
+      router.push(`/chat/${chat?._id}`)
+    } catch (error) {
+      console.log(error);
+      toast.error('failed to create chat')
+    }
   }
+   
+  const handleDeleteChat = async(chatId:string, e:React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+       await deleteChat(chatId);
+       if(pathname === `/chat/${chatId}`){
+        router.push('/')
+       }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const handleLogout = async() =>{
+     try {
+        await logout();
+        toast.success('user logged out successfully');
+        router.push('/sign-in')
+     } catch (error) {
+      console.log(error)
+      toast.error('failed to logout')
+     }
+  }
+
 
   const SidebarSection = ({ title, chats, pathname }: SidebarSectionProps) => {
     if (chats.length === 0) return null;
@@ -100,7 +126,7 @@ const chats =[{
                 variant="ghost"
                 size="icon"
                 className="opacity-0 group-hover:opacity-100 h-8 w-8"
-                // onClick={(e) => handleDeleteChat(chat?._id,e)}
+                onClick={(e) => handleDeleteChat(chat?._id,e)}
               >
                 <Trash2 className="h-4 w-4 text-gray-500" />
               </Button>
@@ -134,8 +160,8 @@ const chats =[{
       <div className="p-4">
         <Button
           variant="outline"
-          // disabled={isChatLoading}
-          // onClick={handleCreateChat}
+          disabled={isChatLoading}
+          onClick={handleCreateChat}
           className="justify-start gap-2 bg-[#dce9ff] px-6 py-6 rounded-xl text-blue-500 hover:bg-blue-100"
         >
           <MessageSquarePlus className="h-5 w-5" />
@@ -260,7 +286,7 @@ const chats =[{
         </SheetContent>
       </Sheet>
     <div className="text-2xl font-semibold text-gray-700 mx-auto">
-          deepseek
+          Chatgpt
         </div>
         <div className="w-10" />
       </div>

@@ -7,6 +7,8 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { userAuthStore } from "@/store/authStore";
 
 const page = () => {
   const [name,setName] = useState("")
@@ -16,11 +18,32 @@ const page = () => {
       const [showPassword, setShowPassword] = useState(false);
       const router = useRouter();
 
-const isLoading = false;
+const {isLoading,register} = userAuthStore();
 
-  const handleSubmit =  async() => {
-    
+
+
+
+  const handleSubmit =  async(e:React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if(password!== confirmPassword){
+        toast.error('Passowrd do not match')
+        return
+      }
+      if(password.length < 6){
+        toast.error('Password must be at least 6 characters')
+        return
+      }
+        await register(name,email,password)
+        toast.success("user register successfully")
+        router.push('/')
+    } catch (error:any) {
+      console.log(error)
+      toast.error(error || "error during register")
+    }
   }
+
+
 
 
   return (
