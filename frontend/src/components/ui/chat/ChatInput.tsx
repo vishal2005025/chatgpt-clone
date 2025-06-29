@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import useSpeechRecognition from "@/lib/useSpeechRecognition";
 import { Textarea } from "../textarea";
 import { Button } from "../button";
-import { Brain, Mic, Pause, Search, Send } from "lucide-react";
+import { ArrowUp, Brain, GitCommitHorizontal, Mic, Pause, Plus, Search, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 
@@ -18,6 +18,9 @@ const ChatInput = ({ onSubmit, isLoading }: ChatInputProps) => {
   const [input, setInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isSpeechActive, setIsSpeechActive] = useState(false);
+
+
+  
   const { transcript, isListening, error } =
     useSpeechRecognition(isSpeechActive);
 
@@ -50,11 +53,11 @@ const ChatInput = ({ onSubmit, isLoading }: ChatInputProps) => {
 
 
   return (
-     <div className="w-3xl max-w-4xl md:ml-64 py-4 px-4 bg-white rounded-xl shadow-[0_-1px_6px_rgba(0,0,0,0.05)] flex flex-col justify-end border ">
+     <div className="w-3xl max-w-3xl md:ml-64 py-2 px-4 bg-white rounded-xl shadow-[0_-1px_6px_rgba(0,0,0,0.05)] flex flex-col justify-end border ">
     <form onSubmit={handleSubmit} className="w-full flex flex-col">
       <Textarea
         ref={textareaRef}
-        placeholder={isListening ? "Listening..." : "Ask Anything to chatgpt"}
+        placeholder={isListening ? "Listening..." : "Ask anything"}
         className="w-full resize-none overflow-y-auto bg-transparent border-none outline-none focus:ring-0 shadow-none px-2 py-2"
         value={input}
         onChange={(e) => setInput(e.target.value)}
@@ -70,9 +73,9 @@ const ChatInput = ({ onSubmit, isLoading }: ChatInputProps) => {
               variant="ghost"
               size="icon"
               disabled={isLoading}
-              className="h-9 w-9 rounded-md border border-gray-400"
+              className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] border-none cursor-pointer "
             >
-              <Search className="h-5 w-5 text-gray-600" />
+              <Plus className="h-full scale-150" strokeWidth={1.5} />
             </Button>
 
             <Button
@@ -80,9 +83,10 @@ const ChatInput = ({ onSubmit, isLoading }: ChatInputProps) => {
               variant="ghost"
               size="icon"
               disabled={isLoading}
-              className="h-9 w-9 rounded-md border border-gray-500"
+              className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] border-none cursor-pointer flex gap-0 flex-col items-center justify-center"
             >
-              <Brain className="h-5 w-5 text-gray-600 " />
+              <GitCommitHorizontal className="h-full scale-120" strokeWidth={1.5}  />
+              <GitCommitHorizontal className="h-full scale-120" strokeWidth={1.5}  />
             </Button>
           </div>
 
@@ -93,12 +97,12 @@ const ChatInput = ({ onSubmit, isLoading }: ChatInputProps) => {
               size="icon"
               disabled={isLoading}
               onClick={() => setIsSpeechActive(!isSpeechActive)}
-              className="h-9 w-9 rounded-md border border-gray-500"
+              className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] border-none cursor-pointer"
             >
               {isListening ? (
-                <Pause className="h-5 w-5 text-blue-600" />
+                <Pause className="h-full scale-130" strokeWidth={1.5}  />
               ) : (
-                <Mic className="h-5 w-5 text-gray-600" />
+                <Mic className="h-full scale-130" strokeWidth={1.5}  />
               )}
             </Button>
 
@@ -108,11 +112,11 @@ const ChatInput = ({ onSubmit, isLoading }: ChatInputProps) => {
               size="icon"
               disabled={isLoading || !input.trim()}
               className={cn(
-                "bg-gray-900 text-white h-9 w-9 p-2 rounded-md ",
+                "bg-[#ebebeb]  h-9 w-9 p-2 rounded-full  ",
                  input.trim() && !isLoading ? "cursor-pointer" : "opacity-50 cursor-not-allowed"
               )}
             >
-              <Send className="h-5 w-5 " />
+              <ArrowUp className="h-full scale-130" strokeWidth={1.5}  />
             </Button>
           </div>
         </div>

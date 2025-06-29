@@ -45,9 +45,9 @@ export default function Home() {
             How can help you today!
           </p>
         </div>
-        <div className=" mt-11 left-0 top-30 right-0 bottom-0 mx-auto flex px-4 justify-center items-center">
-          <ChatInput onSubmit={handleSendMesaage} isLoading={isLoading}/>
-        </div>
+        <div className="fixed bottom-0 left-0 mb-4 right-0 mx-auto flex px-4 justify-center items-center md:static md:pl-10 md:mt-10">
+  <ChatInput onSubmit={handleSendMesaage} isLoading={isLoading}/>
+</div>
       </div>
     </div>
   );

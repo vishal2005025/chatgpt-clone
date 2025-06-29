@@ -7,7 +7,7 @@ import { isToday, isYesterday, subDays, isAfter } from "date-fns";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Button } from "../button";
-import { LogOut, Menu, MessageSquarePlus, PanelLeft, Smartphone, Trash2 } from 'lucide-react';
+import { LogOut, Menu, MessageSquarePlus, PanelLeft, Smartphone, SquarePen, Trash2 } from 'lucide-react';
 import { Sheet } from '../sheet';
 import { ScrollArea } from '@radix-ui/react-scroll-area';
 import { SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '../sheet';
@@ -115,11 +115,11 @@ const currentChat = chats.find((chat: any) => chat._id === currentChatId);
               key={chat._id}
               href={`/chat/${chat._id}`}
               className={cn(
-                "flex justify-around items-center px-2 py-1 rounded-lg group hover:bg-[#dae3ef]",
-                pathname === `/chat/${chat._id}` && "bg-[#dbeaff]"
+                "flex justify-around items-center px-2 py-0.5 rounded-lg group hover:[background-color:#ebebeb]",
+                pathname === `/chat/${chat._id}` && "bg-[#ebebeb]"
               )}
             >
-              <span className="truncate text-gray-700 text-xs flex-1">
+              <span className="truncate text-[#171717] text-sm flex-1">
                 {chat.title}
               </span>
               <Button
@@ -129,7 +129,7 @@ const currentChat = chats.find((chat: any) => chat._id === currentChatId);
                 className="opacity-0 group-hover:opacity-100 h-8 w-8"
                 onClick={(e) => handleDeleteChat(chat?._id,e)}
               >
-                <Trash2 className="h-4 w-4 text-gray-500" />
+                <Trash2 className="h-4 w-4 text-gray-900" />
               </Button>
             </Link>
           ))}
@@ -139,8 +139,8 @@ const currentChat = chats.find((chat: any) => chat._id === currentChatId);
   };
 
   const SidebarContent = () => (
-    <div className="flex h-full flex-col bg-[#f7fcff] ">
-      <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-[#f7fcff] p-4">
+    <div className="flex h-screen flex-col bg-[#fafafa] ">
+      <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-[#fafafa] p-2">
         <Link href="/">
           <img
             src="/images/openai-logo-1 (1).svg"
@@ -163,22 +163,22 @@ const currentChat = chats.find((chat: any) => chat._id === currentChatId);
           variant="outline"
           disabled={isChatLoading}
           onClick={handleCreateChat}
-          className="justify-start gap-2 bg-[#dce9ff] px-6 py-6 rounded-xl text-blue-500 hover:bg-blue-100"
+          className="justify-start gap-2 px-6 py-6 rounded-xl text-[#171717] hover:[background-color:#ebebeb] border-none w-full"
         >
-          <MessageSquarePlus className="h-5 w-5" />
-          <span className="text-[16px]">New Chat</span>
+          <SquarePen className="h-8 w-5 scale-110 " />
+          <span className="text-[14px] ">New Chat</span>
         </Button>
       </div>
 
-      <ScrollArea className="flex-1 px-2">
+      <ScrollArea className="flex-1 px-2 overflow-y-auto min-h-0 custom-scrollbar">
         {isChatLoading ? (
           <div className="flex justify-center py-4">
-            <p className="text-sm text-muted-foreground">Loading chats...</p>
+            <p className="text-m text-muted-foreground">Loading chats...</p>
           </div>
         ) : (
           <>
             <SidebarSection
-              title="today"
+              title="Today"
               chats={todayChats}
               pathname={pathname}
             />
@@ -208,7 +208,7 @@ const currentChat = chats.find((chat: any) => chat._id === currentChatId);
           <Button variant='outline' className="w-full justify-start gap-2">
             <Smartphone className="h-4 w-4"/>
             Get App
-            <span className="ml-auto rounded bg-blue-600 px-1.5 py-0.5 text-xs text-white">NEW</span>
+            <span className="ml-auto rounded bg-[#ebebeb] px-1.5 py-0.5 text-xs ">NEW</span>
 
           </Button>
 
@@ -217,14 +217,14 @@ const currentChat = chats.find((chat: any) => chat._id === currentChatId);
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant='ghost' className="w-full justify-start gap-3 px-3 py-6 hover:bg-gray-200">
+              <Button variant='ghost' className="w-full justify-start gap-3 px-3 py-6 hover:[background-color:#ebebeb]">
                   <Avatar className="h-8 w-8">
   <AvatarImage src={user?.profilePicture} />
   <AvatarFallback className="bg-gray-200 text-gray-700 rounded-full flex items-center justify-center h-8 w-8">
     {user?.name?.charAt(0).toUpperCase()}
   </AvatarFallback>
 </Avatar>
-                  <div className="flex flex-col items-start">
+                  <div className="flex flex-col items-start ">
                     <span className="text-sm font-medium text-gray-900 truncate max-w-[160px]">
                         My Profile
                     </span>
@@ -273,11 +273,11 @@ const currentChat = chats.find((chat: any) => chat._id === currentChatId);
 
   return (
     <>
-      <div className="md:hidden fixed top-0 z-50 flex h-16 w-full items-center justify-between border-b bg-[#f7fcff] px-4">   
+      <div className="md:hidden fixed top-0 z-50 flex h-16 w-full items-center justify-between border-b bg-[#fafafa] px-4">   
       <Sheet >
         <SheetTrigger asChild>
-          <Button variant="ghost" size="icon">
-            <Menu className="h-5 w-5 " />
+          <Button variant="ghost" size="icon" className="w-2 ">
+            <Menu className="h-5 w-5" />
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="w-72">
@@ -287,23 +287,23 @@ const currentChat = chats.find((chat: any) => chat._id === currentChatId);
           <SidebarContent />
         </SheetContent>
       </Sheet>
-    <div className="text-1xl font-semibold text-gray-900 mx-auto">
+    <div className="text-1xl font-semibold text-gray-900 mx-auto ">
          {currentChat ? currentChat.title : "Chatgpt"}
         </div>
         <div className="w-10" />
       </div>
       
-       <div className="hidden md:block">
+       <div className="hidden md:block ">
         <div
           className={cn(
-            "fixed top-0 bottom-0 left-0 z-40 transition-all duration-300",
+            "fixed top-0 bottom-0 left-0 z-40 transition-all duration-300 ",
             sidebarOpen ? "w-72" : "w-0"
           )}
         >
           {sidebarOpen && <SidebarContent />}
 
           {!sidebarOpen && (
-            <div className="fixed top-0 left-4 z-50">
+            <div className="fixed top-3 left-4 z-50  ">
               <Button
                 variant="ghost"
                 size="icon"
@@ -315,7 +315,7 @@ const currentChat = chats.find((chat: any) => chat._id === currentChatId);
           )}
         </div>
       </div>
-      <div className="h-16 md:hidden" />
+      <div className="h-6 md:hidden" />
     </>
   )
 }

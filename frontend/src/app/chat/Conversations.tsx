@@ -1,4 +1,5 @@
 "use client";
+
 import ChatSidebar from "@/components/ui/chat/ChatSidebar";
 import ChatInput from "@/components/ui/chat/ChatInput";
 import ChatMessage from "@/components/ui/chat/ChatMessage";
@@ -54,7 +55,7 @@ const Conversations = ({ id }: { id: string }) => {
     }
   }, [initialMessage, id, sendMessage, router]);
 
-  const handleSendMesaage = async (message: string) => {
+  const handleSendMessage = async (message: string) => {
     try {
       await sendMessage(id, message);
     } catch (error) {
@@ -62,55 +63,63 @@ const Conversations = ({ id }: { id: string }) => {
     }
   };
 
-  if (!isAuthenticated) {
-    return null;
-  }
+  if (!isAuthenticated) return null;
+
   return (
     <div className="flex h-screen overflow-hidden">
-      <ChatSidebar/>
+      <ChatSidebar />
       <div className="flex flex-1 flex-col relative md:ml-64 ml-0 p-4 md:p-10 lg:p-6">
-        <header className="fixed top-0 left-0 right-0 z-10 flex h-14 items-center justify-between shadow-lg bg-background">
+        <header className="fixed top-0 left-0 right-0 z-10 flex h-14 items-center justify-between shadow-lg bg-[#f9f9f9]">
           <div className="w-full max-w-4xl mx-auto px-4 flex justify-center text-center items-center">
-            <h1 className="text-lg mt-4 ml-20 font-semibold">
+            <h1 className="text-lg ml-20 font-semibold">
               {currentChat?.title}
             </h1>
           </div>
         </header>
 
-        <div className="flex-1 w-full max-w-4xl mx-auto pt-12 mb-40">
+        <div className="flex-1 w-full max-w-3xl mx-auto pt-12 mb-40">
           <ScrollArea className="h-[calc(100vh-8.5rem)]">
             <div className="flex flex-col mt-20 px-4 pb-30">
               {messages.length === 0 ? (
-                <div className="flex h-full flex-col items-center justify-center p-8">
-                    <div className="mb-4 h-16 w-16">
-                      <img
-                        src="/images/chatgpt-small-logo.svg"
-                        alt="chatgpt-logo"
-                        className="h-full w-full"
-                      />
-                    </div>
-                    <h2 className="text-2xl font-bold ">Hi, I'm ChatGpt.</h2>
+                <div className="flex h-full flex-col items-center justify-center p-8 ">
+                  <div className="mb-4 h-16 w-16">
+                    <img
+                      src="/images/chatgpt-small-logo.svg"
+                      alt="chatgpt-logo"
+                      className="h-full w-full"
+                    />
+                  </div>
+                  <h2 className="text-2xl font-bold">Hi, I'm ChatGpt.</h2>
                   <p className="mt-2 text-center text-muted-foreground">
-                    How can help you today
+                    How can I help you today!
                   </p>
                 </div>
               ) : (
-                  messages.map((message,index) => (
-                    <ChatMessage
-                      key={index}
-                      message={message}
-                      isUserLoading = {isUserLoading && index === messages.length -2 && message.role === 'user' }
-                      isAiLoading= {isAiLoading && index === messages.length -1 && message.role === 'assistant' }
-                    />
-                  ))
+                messages.map((message, index) => (
+                  <ChatMessage
+                    key={index}
+                    index={index}
+                    message={message}
+                    isUserLoading={
+                      isUserLoading &&
+                      index === messages.length - 2 &&
+                      message.role === "user"
+                    }
+                    isAiLoading={
+                      isAiLoading &&
+                      index === messages.length - 1 &&
+                      message.role === "assistant"
+                    }
+                  />
+                ))
               )}
-              <div ref={messagesEndRef}/>
+              <div ref={messagesEndRef} />
             </div>
           </ScrollArea>
         </div>
 
-          <div className="fixed left-0 mb-4 right-0 bottom-0 mx-auto flex px-4 justify-center items-center md:pl-10">
-          <ChatInput onSubmit={handleSendMesaage} isLoading={isLoading} />
+        <div className="fixed left-0 mb-4 right-0 bottom-0 mx-auto flex px-4 justify-center items-center md:pl-10">
+          <ChatInput onSubmit={handleSendMessage} isLoading={isLoading} />
         </div>
       </div>
     </div>

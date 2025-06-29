@@ -101,53 +101,54 @@ module.exports = { generateStreamResponse };
 
 
 
+//vercelsdk.ai code 
 
-
-// const { model } = require('mongoose');
-// const OpenAI = require('openai');
-
-// const openai = new OpenAI({
-//     apiKey:process.env.OPENAI_API_KEY
-// });
-
+// const { StreamingTextResponse, OpenAIStream, Message } = require("ai");
+// const { OpenAI } = require("openai");
 
 // const DEFAULT_SYSTEM_MESSAGE =
-//   "You are DeepSeek, a helpful AI assistant. You provide accurate, informative, and friendly responses. Always be respectful, helpful, and concise in your responses. After your first message, also include a suitable chat title (in 3-8 words) in the format: [TITLE: Your generated title here]."
+//   "You are ChatGpt, a helpful AI assistant. You provide accurate, informative, and friendly responses. Always be respectful, helpful, and concise in your responses. After your first message, also include a suitable chat title (in 3-8 words) in the format: [TITLE: Your generated title here].";
 
-// async function generateStreamResponse(message,onChunk){
-//     try {
-//         if(!message.some((msg) => msg.role === 'system')){
-//             message= [{role:"system", content:DEFAULT_SYSTEM_MESSAGE},...message]
-//         }
-//         const formattedMessage = message.map((msg) =>({
-//             role:msg.role,
-//             content:msg.content
-//         }));
+// const openai = new OpenAI({
+//   apiKey: process.env.OPENAI_API_KEY,
+// });
 
-//         const stream = await openai.chat.completions.create({
-//             model:"gpt-4o-mini",
-//             messages:formattedMessage,
-//             stream:true
-//         });
+// async function generateStreamResponse(messages, onChunk) {
+//   if (!messages.some((msg) => msg.role === "system")) {
+//     messages = [{ role: "system", content: DEFAULT_SYSTEM_MESSAGE }, ...messages];
+//   }
 
+//   // Convert messages to format expected by OpenAI
+//   const aiMessages = messages.map((msg) => ({
+//     role: msg.role,
+//     content: msg.content,
+//   }));
 
-//         let fullResponse = "";
-//         for await (const chunk of stream){
-//             const content = chunk.choices[0]?.delta?.content || "";
-//             if(content){
-//                 fullResponse += content;
-//                 if(onChunk){
-//                    onChunk(content)
-//                 }
-//             }
-//         }
-        
-//         return fullResponse;
-//     } catch (error) {
-//         console.error("Error in deepseek ai provider",error)
-//         throw new Error(error)
-//     }
+//   const response = await openai.chat.completions.create({
+//     model: "openai/gpt-3.5-turbo", // Or use "gpt-3.5-turbo" depending on your use case
+//     messages: aiMessages,
+//     temperature: 0.7,
+//     stream: true,
+//   });
+
+//   let fullResponse = "";
+//   const stream = OpenAIStream(response, {
+//     async onToken(token) {
+//       fullResponse += token;
+//       onChunk?.(token);
+//     },
+//   });
+
+//   // Await stream to finish before returning
+//   await stream;
+
+//   const titleMatch = fullResponse.match(/\[TITLE:\s*(.*?)\]/i);
+//   const cleanResponse = fullResponse.replace(/\[TITLE:\s*(.*?)\]/i, "").trim();
+
+//   return {
+//     fullResponse: cleanResponse,
+//     title: titleMatch?.[1]?.trim() || null,
+//   };
 // }
 
-
-// module.exports={generateStreamResponse}
+// module.exports = { generateStreamResponse };

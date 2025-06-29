@@ -132,3 +132,21 @@ input:focus {
   box-shadow: none !important;
   border: none !important;
 }
+
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #ededed;
+  border-radius: 8px;
+}
+
+.custom-scrollbar {
+  scrollbar-width: 10px;
+  scrollbar-color: #ededed transparent;
+}
+
+
