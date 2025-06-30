@@ -77,7 +77,7 @@ const Conversations = ({ id }: { id: string }) => {
           </div>
         </header>
 
-        <div className="flex-1 w-full max-w-3xl mx-auto pt-12 mb-40">
+        <div className="flex-1 w-full max-w-3xl mx-auto pt-12 mb-40 ">
           <ScrollArea className="h-[calc(100vh-8.5rem)]">
             <div className="flex flex-col mt-20 px-4 pb-30">
               {messages.length === 0 ? (

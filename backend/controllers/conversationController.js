@@ -1,7 +1,6 @@
-
 const Chat = require("../models/Chat");
 const Conversation = require("../models/Conversation");
-const { generateStreamResponse } = require('../aiProvider/chatgpt-ai');
+const { generateStreamResponse } = require("../aiProvider/chatgpt-ai");
 
 exports.sendMessage = async (req, res) => {
   try {
@@ -22,7 +21,6 @@ exports.sendMessage = async (req, res) => {
       conversation = new Conversation({ chatId, messages: [] });
     }
 
-    // Add user message
     const userMessage = { role: "user", content: message.content };
     conversation.messages.push(userMessage);
     chat.updatedAt = Date.now();
@@ -43,16 +41,16 @@ exports.sendMessage = async (req, res) => {
         }
       );
 
-      // Save assistant message
       conversation.messages.push({
         role: "assistant",
         content: assistantResponse.fullResponse,
       });
       await conversation.save();
 
-      // If it's the first assistant response, extract title
       if (chat.title === "New Chat") {
-        const assistantMessages = conversation.messages.filter((msg) => msg.role === "assistant");
+        const assistantMessages = conversation.messages.filter(
+          (msg) => msg.role === "assistant"
+        );
         if (assistantMessages.length === 1 && assistantResponse.title) {
           chat.title = assistantResponse.title;
           await chat.save();
@@ -62,13 +60,11 @@ exports.sendMessage = async (req, res) => {
       res.write(`data: ${JSON.stringify({ done: true, title: assistantResponse.title })}\n\n`);
       res.write("data: [DONE]\n\n");
       res.end();
-
     } catch (error) {
       console.error("Error generating response:", error);
       res.write(`data: ${JSON.stringify({ error: "Failed to generate response" })}\n\n`);
       res.end();
     }
-
   } catch (error) {
     console.error("Error in sendMessage API:", error);
     res.status(500).json({ error: error.message });
@@ -91,16 +87,10 @@ exports.getConverstion = async (req, res) => {
 
     const messages = conversation.messages.filter((msg) => msg.role !== "system");
     return res.json({ messages });
-
   } catch (error) {
     console.error("Error in getConversation API:", error);
     return res.status(500).json({ error: error.message });
   }
 };
-
-
-
-
-
 
 

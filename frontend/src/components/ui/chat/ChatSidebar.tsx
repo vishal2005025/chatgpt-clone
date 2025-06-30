@@ -254,11 +254,11 @@ const currentChat = chats.find((chat: any) => chat._id === currentChatId);
               </div>
 
               <DropdownMenuItem
-               className="flex items-center mt-2 gap-2 p-3 rounded-lg cursor-pointer text-red-600 hover:bg-red-50 focus:bg-red-100"
+               className="flex items-center mt-2 gap-2 p-3 rounded-lg cursor-pointer text-[#171717] hover:[background-color:#ebebeb] border-none "
                onClick={handleLogout}
               >
                 <LogOut className="h-4 w-4 "/>
-                <span className="text-sm">Logout</span>
+                <span className="text-m">Logout</span>
               </DropdownMenuItem>
 
             </DropdownMenuContent>

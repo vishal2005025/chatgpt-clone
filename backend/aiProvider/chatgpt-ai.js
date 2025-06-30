@@ -1,16 +1,59 @@
+//for image based response 
+
+
 const axios = require("axios");
 const https = require("https");
 
 const DEFAULT_SYSTEM_MESSAGE =
   "You are ChatGpt, a helpful AI assistant. You provide accurate, informative, and friendly responses. Always be respectful, helpful, and concise in your responses. After your first message, also include a suitable chat title (in 3-8 words) in the format: [TITLE: Your generated title here].";
 
-// 🧠 List of fallback models in order of preference (all free/available on OpenRouter)
+// 🧠 List of fallback models (adjust based on vision capability)
 const FALLBACK_MODELS = [
-  "openchat/openchat-3.5-0106",
-  "mistralai/mistral-7b-instruct",
-  "meta-llama/llama-3-8b-instruct",
-  "gryphe/mythomax-l2-13b"
+  "openchat/openchat-3.5-0106", // No vision
+  "mistralai/mistral-7b-instruct", // No vision
+  "meta-llama/llama-3-8b-instruct", // No vision
+  "gryphe/mythomax-l2-13b" // No vision
+  // You can add gpt-4-vision-preview (paid) if needed
 ];
+
+// 🔍 Helper: Detects Cloudinary (or similar) image links
+function isImageUrl(url) {
+  return /^https?:\/\/.*\.(jpeg|jpg|gif|png|webp)$/i.test(url);
+}
+
+// 🧠 Formats messages for OpenRouter (supporting vision model syntax)
+function formatMessages(messages) {
+  return messages.map(msg => {
+    if (isImageUrl(msg.content)) {
+      return {
+        role: msg.role,
+        content: [
+          {
+            type: "image_url",
+            image_url: {
+              url: msg.content
+            }
+          }
+        ]
+      };
+    }
+
+    const match = msg.content.match(/(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))/i);
+    if (match) {
+      const url = match[1];
+      const text = msg.content.replace(url, "").trim();
+      return {
+        role: msg.role,
+        content: [
+          ...(text ? [{ type: "text", text }] : []),
+          { type: "image_url", image_url: { url } }
+        ]
+      };
+    }
+
+    return msg; // plain text
+  });
+}
 
 async function tryModel(model, messages, onChunk) {
   return new Promise(async (resolve, reject) => {
@@ -19,8 +62,7 @@ async function tryModel(model, messages, onChunk) {
         "https://openrouter.ai/api/v1/chat/completions",
         {
           model,
-          messages,
-          // max_tokens: 512,
+          messages: formatMessages(messages),
           stream: true,
         },
         {
@@ -39,14 +81,16 @@ async function tryModel(model, messages, onChunk) {
 
       response.data.on("data", (chunk) => {
         const lines = chunk.toString().split("\n").filter((line) => line.trim() !== "");
-
         for (const line of lines) {
           if (line.startsWith("data:")) {
             const dataStr = line.replace(/^data:\s*/, "");
             if (dataStr === "[DONE]") {
               const titleMatch = fullResponse.match(/\[TITLE:\s*(.*?)\]/i);
               const cleanResponse = fullResponse.replace(/\[TITLE:\s*(.*?)\]/i, "").trim();
-              resolve({ fullResponse: cleanResponse, title: titleMatch?.[1]?.trim() || null });
+              resolve({
+                fullResponse: cleanResponse,
+                title: titleMatch?.[1]?.trim() || null,
+              });
               return;
             }
 
@@ -98,6 +142,13 @@ async function generateStreamResponse(messages, onChunk) {
 }
 
 module.exports = { generateStreamResponse };
+
+
+
+
+
+
+
 
 
 

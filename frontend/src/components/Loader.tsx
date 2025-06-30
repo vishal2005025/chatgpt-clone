@@ -26,7 +26,7 @@ export const Loader = ({
         positionClasses[position],
         className
       )}>
-        <div className="w-10 h-10 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin mb-4" />
+        <div className="w-10 h-10 border-4 border-gray-300 border-t-gray-500 rounded-full animate-spin mb-4" />
         <p className="text-sm text-gray-500">Loading, please wait...</p>
       </div>
     )
@@ -35,7 +35,7 @@ export const Loader = ({
 
   const loaderConfig = {
     ai: {
-      classes: "bg-gradient-to-r from-blue-400 to-blue-600 h-3 w-3 mt-3",
+      classes: "bg-gradient-to-r from-gray-400 to-gray-600 h-3 w-3 mt-3",
       count: 3,
       animation: "animate-bounce"
     },

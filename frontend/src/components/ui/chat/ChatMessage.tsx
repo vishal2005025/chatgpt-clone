@@ -51,6 +51,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       await sendMessage(currentChat._id, editedContent);
     }
   };
+
   const editRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -60,11 +61,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     }
   }, [editedContent, isEditing]);
 
-
   return (
     <div
       className={cn(
-        "group flex w-full items-start gap-4 p-3 rounded-lg",
+        "group flex w-full items-start gap-4 p-3 rounded-lg mt-8",
         message.role === "user" ? "bg-[#f5f5f5] mt-10" : "bg-muted/50",
         "mb-4 relative"
       )}
@@ -89,7 +89,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         ) : message.role === "assistant" && isAiLoading ? (
           <Loader type="ai" />
         ) : isEditing ? (
-          <div className="w-full ">
+          <div className="w-full">
             <textarea
               ref={editRef}
               className="w-full text-m rounded-md p-1 border-none resize-none overflow-y-auto max-h-52 custom-scrollbar"
@@ -113,70 +113,96 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             </div>
           </div>
         ) : (
-          <div className="prose prose-sm max-w-none">
-            <Markdown content={message.content} />
+          <div className="prose prose-sm max-w-none space-y-2">
+            {message.content.split("\n").map((line, i) => {
+              const trimmed = line.trim();
+              const isImage = /^https?:\/\/.*\.(jpeg|jpg|gif|png|webp|svg|bmp|tiff)(\?.*)?$/.test(
+                trimmed
+              );
+              const isLink = /^https?:\/\//.test(trimmed);
+
+              if (isImage) {
+                return (
+                  <img
+                    key={i}
+                    src={trimmed}
+                    alt="Uploaded"
+                    className="max-w-xs rounded-xl border"
+                  />
+                );
+              } else if (isLink) {
+                return (
+                  <a
+                    key={i}
+                    href={trimmed}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline"
+                  >
+                    {trimmed}
+                  </a>
+                );
+              } else {
+                return <Markdown key={i} content={trimmed} />;
+              }
+            })}
           </div>
         )}
       </div>
+
       {message.role === "user" && !isEditing ? (
         <div className="absolute right-0 -bottom-10 flex gap-0 opacity-0 group-hover:opacity-100 transition-opacity ">
           <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => handleCopy(message.content)}
-              className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] border-none cursor-pointer "
-            >
-          <Copy
-            className="h-5 w-5 text-[#5c5c5c] cursor-pointer "
-          />
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => handleCopy(message.content)}
+            className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] border-none cursor-pointer "
+          >
+            <Copy className="h-5 w-5 text-[#5c5c5c] cursor-pointer " />
           </Button>
           <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={handleEdit}
-              className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] border-none cursor-pointer "
-            >
-          <Pencil
-            className="h-5 w-5 text-[#5c5c5c] cursor-pointer"
-          />
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={handleEdit}
+            className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] border-none cursor-pointer "
+          >
+            <Pencil className="h-5 w-5 text-[#5c5c5c] cursor-pointer" />
           </Button>
         </div>
       ) : message.role !== "user" ? (
         <div className="absolute left-4 -bottom-10 flex gap-0">
           <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => handleCopy(message.content)}
-              className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] border-none cursor-pointer "
-            >
-          <Copy
-            className="h-5 w-5 text-[#5c5c5c] cursor-pointer"
-          />
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => handleCopy(message.content)}
+            className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] border-none cursor-pointer "
+          >
+            <Copy className="h-5 w-5 text-[#5c5c5c] cursor-pointer" />
           </Button>
           <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] border-none cursor-pointer "
-            >
-          <ThumbsUp
-            className="h-5 w-5 text-[#5c5c5c] cursor-pointer"
-            onClick={() => toast.success("liked")}
-          />
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] border-none cursor-pointer "
+          >
+            <ThumbsUp
+              className="h-5 w-5 text-[#5c5c5c] cursor-pointer"
+              onClick={() => toast.success("liked")}
+            />
           </Button>
           <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] border-none cursor-pointer "
-            >
-          <ThumbsDown
-            className="h-5 w-5 text-[#5c5c5c] cursor-pointer"
-            onClick={() => toast.success("unliked")}
-          />
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] border-none cursor-pointer "
+          >
+            <ThumbsDown
+              className="h-5 w-5 text-[#5c5c5c] cursor-pointer"
+              onClick={() => toast.success("unliked")}
+            />
           </Button>
         </div>
       ) : null}
