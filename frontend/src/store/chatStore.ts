@@ -25,11 +25,13 @@ interface ChatState {
   isAiLoading: boolean;
   hasFetchChatOnce: boolean;
   error: string | null;
+  abortController: AbortController | null;
   fetchChats: () => Promise<void>;
   fetchChat: (chatId: string) => Promise<void>;
   createChat: (title?: string) => Promise<Chat>;
   deleteChat: (chatId: string) => Promise<void>;
   sendMessage: (chatId: string, content: string) => Promise<void>;
+  stopGenerating: () => void;
   updateUserMessage: (index: number, newContent: string) => void;
 }
 
@@ -43,6 +45,7 @@ export const useChatStore = create<ChatState>()((set, get) => ({
   isAiLoading: false,
   isChatLoading: false,
   hasFetchChatOnce: false,
+  abortController: null,
 
   fetchChats: async () => {
     try {
@@ -99,193 +102,107 @@ export const useChatStore = create<ChatState>()((set, get) => ({
     }
   },
 
-  // sendMessage: async (chatId, content) => {
-  //   const userMessage = { role: "user" as const, content };
-  //   const assistantMessage = { role: "assistant" as const, content: "" };
+  sendMessage: async (chatId, content) => {
+    const userMessage = { role: "user" as const, content };
+    const assistantMessage = { role: "assistant" as const, content: "" };
 
-  //   set({
-  //     isAiLoading: true,
-  //     error: null,
-  //   });
+    set({
+      isAiLoading: true,
+      error: null,
+    });
 
-  //   set((state) => ({
-  //     messages: [...state.messages, userMessage, assistantMessage],
-  //   }));
+    set((state) => ({
+      messages: [...state.messages, userMessage, assistantMessage],
+    }));
 
-  //   try {
-  //     const response = await fetch(
-  //       `${process.env.NEXT_PUBLIC_API_URL}/conversation/${chatId}/messages`,
-  //       {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         credentials: "include",
-  //         body: JSON.stringify({ message: userMessage }),
-  //       }
-  //     );
+    const abortController = new AbortController();
+    set({ abortController });
 
-  //     if (!response.ok) throw new Error("failed to send message");
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/conversation/${chatId}/messages`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ message: userMessage }),
+          signal: abortController.signal,
+        }
+      );
 
-  //     const reader = response.body?.getReader();
-  //     const decoder = new TextDecoder();
-  //     let assistantResponse = "";
+      if (!response.ok) throw new Error("failed to send message");
 
-  //     if (reader) {
-  //       while (true) {
-  //         const { done, value } = await reader.read();
-  //         if (done) break;
-  //         const chunk = decoder.decode(value);
-  //         const lines = chunk.split("\n").filter(Boolean);
-  //         for (const line of lines) {
-  //           if (line.startsWith("data: ")) {
-  //             const data = line.slice(6).trim();
-  //             if (data === "[DONE]") continue;
-  //             try {
-  //               const parsed = JSON.parse(data);
-  //               if (parsed.content) {
-  //                 assistantResponse += parsed.content;
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let assistantResponse = "";
 
-  //                 // Live update
-  //                 set((state) => {
-  //                   const updated = [...state.messages];
-  //                   const last = updated[updated.length - 1];
-  //                   if (last?.role === "assistant") {
-  //                     last.content = assistantResponse;
-  //                   }
-  //                   return { messages: updated };
-  //                 });
-  //               }
-  //             } catch (error: any) {
-  //               console.log("stream parse error", error);
-  //               const message = error?.response?.data?.error || error.message;
-  //               set({ error: message });
-  //             }
-  //           }
-  //         }
-  //       }
-  //     }
-
-  //     if (!get().hasFetchChatOnce) {
-  //       const lastMessage = get().messages.at(-1);
-  //       if (lastMessage?.role === "assistant" && lastMessage.content.trim()) {
-  //         await get().fetchChats();
-  //         set({ hasFetchChatOnce: true });
-  //       }
-  //     }
-
-  //     await get().fetchChat(chatId);
-  //   } catch (error: any) {
-  //     const message = error?.response?.data?.error || error.message;
-
-  //     set((state) => {
-  //       const msg = [...state.messages];
-  //       if (msg.at(-1)?.role === "assistant") msg.pop();
-  //       return { messages: msg, error: message };
-  //     });
-  //   } finally {
-  //     set({
-  //       isAiLoading: false,
-  //       hasFetchChatOnce: false,
-  //     });
-  //   }
-  // },
-
-
-
-sendMessage: async (chatId, content) => {
-  const userMessage = { role: "user" as const, content };
-  const assistantMessage = { role: "assistant" as const, content: "" };
-
-  set({
-    isAiLoading: true,
-    error: null,
-  });
-
-  set((state) => ({
-    messages: [...state.messages, userMessage, assistantMessage],
-  }));
-
-  try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/conversation/${chatId}/messages`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ message: userMessage }), // 👈 no changes needed here
-      }
-    );
-
-    if (!response.ok) throw new Error("failed to send message");
-
-    const reader = response.body?.getReader();
-    const decoder = new TextDecoder();
-    let assistantResponse = "";
-
-    if (reader) {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value);
-        const lines = chunk.split("\n").filter(Boolean);
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const data = line.slice(6).trim();
-            if (data === "[DONE]") continue;
-            try {
-              const parsed = JSON.parse(data);
-              if (parsed.content) {
-                assistantResponse += parsed.content;
-
-                set((state) => {
-                  const updated = [...state.messages];
-                  const last = updated[updated.length - 1];
-                  if (last?.role === "assistant") {
-                    last.content = assistantResponse;
-                  }
-                  return { messages: updated };
-                });
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value);
+          const lines = chunk.split("\n").filter(Boolean);
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              const data = line.slice(6).trim();
+              if (data === "[DONE]") continue;
+              try {
+                const parsed = JSON.parse(data);
+                if (parsed.content) {
+                  assistantResponse += parsed.content;
+                  set((state) => {
+                    const updated = [...state.messages];
+                    const last = updated[updated.length - 1];
+                    if (last?.role === "assistant") {
+                      last.content = assistantResponse;
+                    }
+                    return { messages: updated };
+                  });
+                }
+              } catch (error: any) {
+                set({ error: error?.message });
               }
-            } catch (error: any) {
-              const message = error?.response?.data?.error || error.message;
-              set({ error: message });
             }
           }
         }
       }
-    }
 
-    if (!get().hasFetchChatOnce) {
-      const lastMessage = get().messages.at(-1);
-      if (lastMessage?.role === "assistant" && lastMessage.content.trim()) {
-        await get().fetchChats();
-        set({ hasFetchChatOnce: true });
+      if (!get().hasFetchChatOnce) {
+        const lastMessage = get().messages.at(-1);
+        if (lastMessage?.role === "assistant" && lastMessage.content.trim()) {
+          await get().fetchChats();
+          set({ hasFetchChatOnce: true });
+        }
       }
+
+      await get().fetchChat(chatId);
+    } catch (error: any) {
+      if (error.name === "AbortError") {
+        console.log("Streaming aborted.");
+      } else {
+        const message = error?.response?.data?.error || error.message;
+        set((state) => {
+          const msg = [...state.messages];
+          if (msg.at(-1)?.role === "assistant") msg.pop();
+          return { messages: msg, error: message };
+        });
+      }
+    } finally {
+      set({
+        isAiLoading: false,
+        hasFetchChatOnce: false,
+        abortController: null,
+      });
     }
+  },
 
-    await get().fetchChat(chatId);
-  } catch (error: any) {
-    const message = error?.response?.data?.error || error.message;
-
-    set((state) => {
-      const msg = [...state.messages];
-      if (msg.at(-1)?.role === "assistant") msg.pop();
-      return { messages: msg, error: message };
-    });
-  } finally {
-    set({
-      isAiLoading: false,
-      hasFetchChatOnce: false,
-    });
-  }
-},
-
-
-
-
+  stopGenerating: () => {
+    const controller = get().abortController;
+    if (controller) {
+      controller.abort();
+      set({ abortController: null });
+    }
+  },
 
   updateUserMessage: (index, newContent) => {
     set((state) => {

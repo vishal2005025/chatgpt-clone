@@ -1,13 +1,14 @@
 //for image based response 
 
 
+
 const axios = require("axios");
 const https = require("https");
 
 const DEFAULT_SYSTEM_MESSAGE =
   "You are ChatGpt, a helpful AI assistant. You provide accurate, informative, and friendly responses. Always be respectful, helpful, and concise in your responses. After your first message, also include a suitable chat title (in 3-8 words) in the format: [TITLE: Your generated title here].";
 
-// 🧠 List of fallback models (adjust based on vision capability)
+//  List of fallback models (adjust based on vision capability)
 const FALLBACK_MODELS = [
   "openchat/openchat-3.5-0106", // No vision
   "mistralai/mistral-7b-instruct", // No vision
@@ -16,12 +17,12 @@ const FALLBACK_MODELS = [
   // You can add gpt-4-vision-preview (paid) if needed
 ];
 
-// 🔍 Helper: Detects Cloudinary (or similar) image links
+//  Helper: Detects Cloudinary (or similar) image links
 function isImageUrl(url) {
   return /^https?:\/\/.*\.(jpeg|jpg|gif|png|webp)$/i.test(url);
 }
 
-// 🧠 Formats messages for OpenRouter (supporting vision model syntax)
+//  Formats messages for OpenRouter (supporting vision model syntax)
 function formatMessages(messages) {
   return messages.map(msg => {
     if (isImageUrl(msg.content)) {
@@ -150,48 +151,91 @@ module.exports = { generateStreamResponse };
 
 
 
+// backend/aiProvider/chatgpt-ai.js
 
-
-//vercelsdk.ai code 
-
-// const { StreamingTextResponse, OpenAIStream, Message } = require("ai");
-// const { OpenAI } = require("openai");
+// const { streamText } = require("ai");
+// const https = require("https");
 
 // const DEFAULT_SYSTEM_MESSAGE =
 //   "You are ChatGpt, a helpful AI assistant. You provide accurate, informative, and friendly responses. Always be respectful, helpful, and concise in your responses. After your first message, also include a suitable chat title (in 3-8 words) in the format: [TITLE: Your generated title here].";
 
-// const openai = new OpenAI({
-//   apiKey: process.env.OPENAI_API_KEY,
-// });
+// const FALLBACK_MODELS = [
+//   "openchat/openchat-3.5-0106",
+//   "mistralai/mistral-7b-instruct",
+//   "meta-llama/llama-3-8b-instruct",
+//   "gryphe/mythomax-l2-13b",
+// ];
 
-// async function generateStreamResponse(messages, onChunk) {
-//   if (!messages.some((msg) => msg.role === "system")) {
-//     messages = [{ role: "system", content: DEFAULT_SYSTEM_MESSAGE }, ...messages];
-//   }
+// function isImageUrl(url) {
+//   return /^https?:\/\/.*\.(jpeg|jpg|gif|png|webp)$/i.test(url);
+// }
 
-//   // Convert messages to format expected by OpenAI
-//   const aiMessages = messages.map((msg) => ({
-//     role: msg.role,
-//     content: msg.content,
-//   }));
+// function formatMessages(messages) {
+//   return messages.map((msg) => {
+//     if (isImageUrl(msg.content)) {
+//       return {
+//         role: msg.role,
+//         content: [
+//           {
+//             type: "image_url",
+//             image_url: { url: msg.content },
+//           },
+//         ],
+//       };
+//     }
 
-//   const response = await openai.chat.completions.create({
-//     model: "openai/gpt-3.5-turbo", // Or use "gpt-3.5-turbo" depending on your use case
-//     messages: aiMessages,
-//     temperature: 0.7,
-//     stream: true,
+//     const match = msg.content.match(/(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))/i);
+//     if (match) {
+//       const url = match[1];
+//       const text = msg.content.replace(url, "").trim();
+//       return {
+//         role: msg.role,
+//         content: [
+//           ...(text ? [{ type: "text", text }] : []),
+//           { type: "image_url", image_url: { url } },
+//         ],
+//       };
+//     }
+
+//     return msg; // plain text
 //   });
+// }
 
-//   let fullResponse = "";
-//   const stream = OpenAIStream(response, {
-//     async onToken(token) {
-//       fullResponse += token;
-//       onChunk?.(token);
+// async function tryModel(model, messages, onChunk) {
+//   const formattedMessages = formatMessages(messages);
+
+//   const { textStream } = await streamText({
+//     model,
+//     messages: formattedMessages,
+//     provider: {
+//       // 👇 OpenRouter endpoint & headers
+//       fetch: (url, options) =>
+//         fetch("https://openrouter.ai/api/v1/chat/completions", {
+//           ...options,
+//           method: "POST",
+//           headers: {
+//             Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+//             "HTTP-Referer": "http://localhost:3000", // Your site
+//             "X-Title": "ChatGPT Clone",
+//             "Content-Type": "application/json",
+//           },
+//           body: JSON.stringify({
+//             model,
+//             messages: formattedMessages,
+//             stream: true,
+//           }),
+//           agent: new https.Agent({ keepAlive: true }),
+//         }),
 //     },
 //   });
 
-//   // Await stream to finish before returning
-//   await stream;
+//   let fullResponse = "";
+//   for await (const chunk of textStream) {
+//     if (chunk.type === "text") {
+//       fullResponse += chunk.value;
+//       onChunk?.(chunk.value);
+//     }
+//   }
 
 //   const titleMatch = fullResponse.match(/\[TITLE:\s*(.*?)\]/i);
 //   const cleanResponse = fullResponse.replace(/\[TITLE:\s*(.*?)\]/i, "").trim();
@@ -200,6 +244,25 @@ module.exports = { generateStreamResponse };
 //     fullResponse: cleanResponse,
 //     title: titleMatch?.[1]?.trim() || null,
 //   };
+// }
+
+// async function generateStreamResponse(messages, onChunk) {
+//   if (!messages.some((msg) => msg.role === "system")) {
+//     messages = [{ role: "system", content: DEFAULT_SYSTEM_MESSAGE }, ...messages];
+//   }
+
+//   for (const model of FALLBACK_MODELS) {
+//     try {
+//       console.log(`🔄 Trying model: ${model}`);
+//       const result = await tryModel(model, messages, onChunk);
+//       console.log(`✅ Model success: ${model}`);
+//       return result;
+//     } catch (err) {
+//       console.warn(`⚠️ Model failed: ${model}`, err.message);
+//     }
+//   }
+
+//   throw new Error("All fallback models failed or were rate-limited.");
 // }
 
 // module.exports = { generateStreamResponse };

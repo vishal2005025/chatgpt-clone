@@ -11,8 +11,10 @@ import {
   Pause,
   Plus,
   X,
+  Square,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useChatStore } from "@/store/chatStore"; 
 
 interface ChatInputProps {
   onSubmit: (message: string) => void;
@@ -26,6 +28,7 @@ const ChatInput = ({ onSubmit, isLoading }: ChatInputProps) => {
   const [uploading, setUploading] = useState(false);
   const [isSpeechActive, setIsSpeechActive] = useState(false);
 
+  const { stopGenerating, isAiLoading } = useChatStore(); 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropRef = useRef<HTMLDivElement>(null);
@@ -176,7 +179,7 @@ const ChatInput = ({ onSubmit, isLoading }: ChatInputProps) => {
               handleSubmit(e);
             }
           }}
-          disabled={isLoading || uploading}
+          disabled={isLoading || uploading || isAiLoading}
           rows={1}
           style={{ maxHeight: 150, minHeight: 40 }}
         />
@@ -196,7 +199,7 @@ const ChatInput = ({ onSubmit, isLoading }: ChatInputProps) => {
               type="button"
               variant="ghost"
               size="icon"
-              disabled={isLoading || uploading}
+              disabled={isLoading || uploading || isAiLoading}
               onClick={() => fileInputRef.current?.click()}
               className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] border-none cursor-pointer"
             >
@@ -207,7 +210,7 @@ const ChatInput = ({ onSubmit, isLoading }: ChatInputProps) => {
               type="button"
               variant="ghost"
               size="icon"
-              disabled={isLoading}
+              disabled={isLoading || isAiLoading}
               className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] border-none cursor-pointer flex gap-0 flex-col items-center justify-center"
             >
               <GitCommitHorizontal className="h-full scale-120" strokeWidth={1.5} />
@@ -220,7 +223,7 @@ const ChatInput = ({ onSubmit, isLoading }: ChatInputProps) => {
               type="button"
               variant="ghost"
               size="icon"
-              disabled={isLoading}
+              disabled={isLoading || isAiLoading}
               onClick={() => setIsSpeechActive(!isSpeechActive)}
               className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] border-none cursor-pointer"
             >
@@ -231,22 +234,34 @@ const ChatInput = ({ onSubmit, isLoading }: ChatInputProps) => {
               )}
             </Button>
 
-            <Button
-              type="submit"
-              variant="ghost"
-              size="icon"
-              disabled={
-                isLoading || uploading || (!input.trim() && imageUrls.length === 0)
-              }
-              className={cn(
-                "bg-[#ebebeb]  h-9 w-9 p-2 rounded-full",
-                input.trim() || imageUrls.length > 0
-                  ? "cursor-pointer"
-                  : "opacity-50 cursor-not-allowed"
-              )}
-            >
-              <ArrowUp className="h-full scale-130" strokeWidth={1.5} />
-            </Button>
+            {isAiLoading ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={stopGenerating}
+                className="bg-black  h-9 w-9 p-2 rounded-full border-none cursor-pointer"
+              >
+                <Square className="h-full scale-90 text-white bg-white " strokeWidth={2.2} />
+              </Button>
+            ) : (
+              <Button
+                type="submit"
+                variant="ghost"
+                size="icon"
+                disabled={
+                  isLoading || uploading || (!input.trim() && imageUrls.length === 0)
+                }
+                className={cn(
+                  "bg-[#ebebeb] h-9 w-9 p-2 rounded-full",
+                  input.trim() || imageUrls.length > 0
+                    ? "cursor-pointer"
+                    : "opacity-50 cursor-not-allowed"
+                )}
+              >
+                <ArrowUp className="h-full scale-130" strokeWidth={1.5} />
+              </Button>
+            )}
           </div>
         </div>
       </form>
