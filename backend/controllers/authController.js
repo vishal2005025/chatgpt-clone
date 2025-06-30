@@ -31,7 +31,7 @@ exports.register = async (req, res) => {
     );
     res.cookie("auth_token", token, {
       httpOnly: true,
-      samesite: "none",
+      sameSite: "None",
       secure: true,
     });
 
@@ -77,7 +77,7 @@ exports.login = async (req, res) => {
     );
     res.cookie("auth_token", token, {
       httpOnly: true,
-      samesite: "none",
+     sameSite: "None",
       secure: true,
     });
 
@@ -128,7 +128,7 @@ exports.googleCallback = async (req, res) => {
     );
     res.cookie("auth_token", token, {
       httpOnly: true,
-      samesite: "none",
+      sameSite: "None",
       secure: true,
     });
 
