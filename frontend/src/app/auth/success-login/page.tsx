@@ -34,43 +34,45 @@
 // }
 
 
-
-"use client";
+'use client';
 import { Loader } from "@/components/Loader";
 import { userAuthStore } from "@/store/authStore";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function SuccessLogin() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
+
   const { userProfile } = userAuthStore();
+  const [attempts, setAttempts] = useState(0);
+ const maxAttempts = 50;
 
   useEffect(() => {
-    const tryLogin = async (retries = 5, delay = 1000) => {
-      if (!token) {
-        router.push("/sign-in");
-        return;
-      }
-
-      for (let i = 0; i < retries; i++) {
-        try {
-          await new Promise((res) => setTimeout(res, delay)); // wait for cookie
-          await userProfile();
-          router.push("/");
-          return;
-        } catch (err) {
-          console.warn(`Retrying userProfile... (${i + 1}/${retries})`);
-        }
-      }
-
-      // If all retries fail, go to sign-in
+    if (!token) {
       router.push("/sign-in");
-    };
+      return;
+    }
 
-    tryLogin();
-  }, [token, userProfile, router]);
+    const interval = setInterval(() => {
+      const hasAuthToken = document.cookie
+        .split("; ")
+        .some((cookie) => cookie.startsWith("auth_token="));
+
+      if (hasAuthToken) {
+        clearInterval(interval);
+        userProfile().then(() => router.push("/"));
+      } else if (attempts >= maxAttempts) {
+        clearInterval(interval);
+        router.push("/sign-in"); // fallback if auth_token never appears
+      } else {
+        setAttempts((prev) => prev + 1);
+      }
+    }, 200);
+
+    return () => clearInterval(interval);
+  }, [token, userProfile, router, attempts]);
 
   return (
     <div className="flex h-screen items-center justify-center">
