@@ -35,9 +35,7 @@
 
 
 
-
-
-'use client';
+"use client";
 import { Loader } from "@/components/Loader";
 import { userAuthStore } from "@/store/authStore";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -47,30 +45,31 @@ export default function SuccessLogin() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
-
   const { userProfile } = userAuthStore();
 
   useEffect(() => {
-    if (!token) {
-      router.push("/sign-in");
-      return;
-    }
-
-    // Poll every 200ms until auth_token is present in browser cookies
-    const interval = setInterval(() => {
-      const hasAuthToken = document.cookie
-        .split("; ")
-        .some((cookie) => cookie.trim().startsWith("auth_token="));
-        
-      if (hasAuthToken) {
-        clearInterval(interval);
-        userProfile().then(() => {
-          router.push("/");
-        });
+    const tryLogin = async (retries = 5, delay = 1000) => {
+      if (!token) {
+        router.push("/sign-in");
+        return;
       }
-    }, 200);
 
-    return () => clearInterval(interval);
+      for (let i = 0; i < retries; i++) {
+        try {
+          await new Promise((res) => setTimeout(res, delay)); // wait for cookie
+          await userProfile();
+          router.push("/");
+          return;
+        } catch (err) {
+          console.warn(`Retrying userProfile... (${i + 1}/${retries})`);
+        }
+      }
+
+      // If all retries fail, go to sign-in
+      router.push("/sign-in");
+    };
+
+    tryLogin();
   }, [token, userProfile, router]);
 
   return (
