@@ -7,7 +7,7 @@ import { isToday, isYesterday, subDays, isAfter } from "date-fns";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Button } from "../button";
-import { LogOut, Menu, MessageSquarePlus, PanelLeft, Smartphone, SquarePen, Trash2 } from 'lucide-react';
+import { Images, LogOut, Menu, MessageSquarePlus, PanelLeft, Pencil, Search, Smartphone, SquarePen, Trash2 } from 'lucide-react';
 import { Sheet } from '../sheet';
 import { ScrollArea } from '@radix-ui/react-scroll-area';
 import { SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '../sheet';
@@ -152,21 +152,32 @@ const currentChat = chats.find((chat: any) => chat._id === currentChatId);
           variant="ghost"
           size="icon"
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="md:flex hidden"
+          className="md:flex hidden cursor-pointer"
         >
           <PanelLeft className="h-5 w-5" />
         </Button>
       </div>
 
-      <div className="p-4">
+      <div className="p-3">
         <Button
           variant="outline"
           disabled={isChatLoading}
           onClick={handleCreateChat}
-          className="justify-start gap-2 px-6 py-6 rounded-xl text-[#171717] hover:[background-color:#ebebeb] border-none w-full"
+          className="justify-start gap-2 px-6 py-6 rounded-xl text-[#171717] hover:[background-color:#ebebeb] border-none w-full cursor-pointer"
         >
           <SquarePen className="h-8 w-5 scale-110 " />
-          <span className="text-[14px] ">New Chat</span>
+          <span className="text-[14px] ">New chat</span>
+        </Button>
+      </div>
+
+      <div className="p-3 -mt-7 border-none ">
+        <Button
+          variant="outline"
+          disabled={isChatLoading}
+          className="justify-start gap-2 px-6 py-6 rounded-xl  text-[#171717] hover:[background-color:#ebebeb] border-none w-full cursor-pointer"
+        >
+          <Search className="h-8 w-5 scale-110 " />
+          <span className="text-[14px]  ">Search chats</span>
         </Button>
       </div>
 
@@ -207,7 +218,7 @@ const currentChat = chats.find((chat: any) => chat._id === currentChatId);
         <div className="border-t- p-4 ">
           <Button variant='outline' className="w-full justify-start gap-2">
             <Smartphone className="h-4 w-4"/>
-            Get App
+            Upgrade NOW
             <span className="ml-auto rounded bg-[#ebebeb] px-1.5 py-0.5 text-xs ">NEW</span>
 
           </Button>
@@ -217,8 +228,8 @@ const currentChat = chats.find((chat: any) => chat._id === currentChatId);
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant='ghost' className="w-full justify-start gap-3 px-3 py-6 hover:[background-color:#ebebeb]">
-                  <Avatar className="h-8 w-8">
+              <Button variant='ghost' className="w-full justify-start gap-3 px-3 py-6 hover:[background-color:#ebebeb] cursor-pointer">
+                  <Avatar className="h-8 w-8 ">
   <AvatarImage src={user?.profilePicture} />
   <AvatarFallback className="bg-gray-200 text-gray-700 rounded-full flex items-center justify-center h-8 w-8">
     {user?.name?.charAt(0).toUpperCase()}
@@ -276,13 +287,13 @@ const currentChat = chats.find((chat: any) => chat._id === currentChatId);
       <div className="md:hidden fixed top-0 z-50 flex h-16 w-full items-center justify-between border-b bg-[#fafafa] px-4">   
       <Sheet >
         <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="w-2 ">
-            <Menu className="h-5 w-5" />
+          <Button variant="ghost" size="icon" className="w-6 cursor-pointer">
+            <Menu className="h-8 w-8" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-72">
-          <SheetHeader>
-            <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+        <SheetContent side="left" className="w-72 bg-[#ededed]">
+          <SheetHeader className="flex items-center justify-between bg-[#fafafa] -mb-10 ">
+            <SheetTitle className="text-m"></SheetTitle>
           </SheetHeader>
           <SidebarContent />
         </SheetContent>
@@ -303,14 +314,47 @@ const currentChat = chats.find((chat: any) => chat._id === currentChatId);
           {sidebarOpen && <SidebarContent />}
 
           {!sidebarOpen && (
-            <div className="fixed top-3 left-4 z-50  ">
+            <div className="fixed  flex flex-col items-center  h-full bg-[#ffffff] p-2 border border-gray-100">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setSidebarOpen(true)}
+                className="md:flex hidden cursor-pointer h-10"
               >
-                <Menu className="h-5 w-5" />
+                <img
+                src="/images/chatgpt-small-logo.svg"
+                alt="chatgpt-logo"
+                className="h-full w-full"
+              />
+          
+
               </Button>
+              <div className="border-none outline-none mt-4">
+        <Button
+          variant="outline"
+          disabled={isChatLoading}
+          onClick={handleCreateChat}
+          className="px-2 py-2 rounded-xl text-[#171717] hover:[background-color:#ebebeb] border-none outline-none w-full cursor-pointer"
+        >
+          <SquarePen className="h-8 w-8 scale-110 " />
+        </Button>
+      </div>
+      <div className="border-none outline-none mt-2">
+        <Button
+          variant="outline"
+          className="px-2 py-2 rounded-xl text-[#171717] hover:[background-color:#ebebeb] border-none outline-none w-full cursor-pointer"
+        >
+          <Search className="h-8 w-8 scale-110 " />
+        </Button>
+      </div>
+      <div className="border-none outline-none mt-2">
+        <Button
+          variant="outline"
+          className="px-2 py-2 rounded-xl text-[#171717] hover:[background-color:#ebebeb] border-none outline-none w-full cursor-pointer"
+        >
+          <Images className="h-8 w-8 scale-110 " />
+        </Button>
+      </div>
             </div>
           )}
         </div>

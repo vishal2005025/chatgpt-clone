@@ -42,7 +42,7 @@ export default function Home() {
             <h2 className="text-2xl font-bold text-gray-900">Hi, I'm ChatGpt.</h2>
           </div>
           <p className="text-center text-muted-foreground">
-            How can help you today!
+            How can I help you today!
           </p>
         </div>
         <div className="fixed bottom-0 left-0 mb-4 right-0 mx-auto flex px-4 justify-center items-center md:static md:pl-10 md:mt-10">

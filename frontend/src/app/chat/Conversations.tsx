@@ -69,7 +69,7 @@ const Conversations = ({ id }: { id: string }) => {
     <div className="flex h-screen overflow-hidden">
       <ChatSidebar />
       <div className="flex flex-1 flex-col relative md:ml-64 ml-0 p-4 md:p-10 lg:p-6">
-        <header className="fixed top-0 left-0 right-0 z-10 flex h-14 items-center justify-between shadow-lg bg-[#f9f9f9]">
+        <header className="fixed top-0 left-0 right-0 z-10 flex h-14 items-center justify-between  bg-[#ffffff]">
           <div className="w-full max-w-4xl mx-auto px-4 flex justify-center text-center items-center">
             <h1 className="text-lg ml-20 font-semibold">
               {currentChat?.title}
