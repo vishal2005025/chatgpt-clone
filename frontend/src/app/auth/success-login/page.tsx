@@ -69,7 +69,7 @@ export default function SuccessLogin() {
       } else {
         setAttempts((prev) => prev + 1);
       }
-    }, 200);
+    }, 2000);
 
     return () => clearInterval(interval);
   }, [token, userProfile, router, attempts]);
