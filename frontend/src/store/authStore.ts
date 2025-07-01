@@ -25,70 +25,140 @@ interface AuthState {
 
 
 
-export const userAuthStore = create<AuthState>() (
-    persist(
-        (set,get) => ({
-            user:null,
-            isAuthenticated:false,
-            error:null,
-            isLoading:false,
+// export const userAuthStore = create<AuthState>() (
+//     persist(
+//         (set,get) => ({
+//             user:null,
+//             isAuthenticated:false,
+//             error:null,
+//             isLoading:false,
 
-            login:async(email, password) =>{
-                try {
-                    set({error:null,isLoading:true});
-                    const {data}= await api.post("/auth/login", {email,password})
-                    set({user:data.user, isAuthenticated:true, isLoading:false})
-                } catch (error:any) {
-                    const message= error.response?.data?.error;
-                    set({error:message,isLoading:false})
-                }
-            },
-
-
-            register:async(name,email, password) =>{
-                try {
-                    set({error:null,isLoading:true});
-                    const {data}= await api.post("/auth/register", {name,email,password})
-                    set({user:data.user, isAuthenticated:true, isLoading:false})
-                } catch (error:any) {
-                    const message= error.response?.data?.error;
-                    set({error:message,isLoading:false})
-                }
-            },
+//             login:async(email, password) =>{
+//                 try {
+//                     set({error:null,isLoading:true});
+//                     const {data}= await api.post("/auth/login", {email,password})
+//                     set({user:data.user, isAuthenticated:true, isLoading:false})
+//                 } catch (error:any) {
+//                     const message= error.response?.data?.error;
+//                     set({error:message,isLoading:false})
+//                 }
+//             },
 
 
-                        logout:async() =>{
-                try {
-                    set({error:null,isLoading:true});
-                    const {data}= await api.post("/auth/logout", {})
-                    set({ user:null,isAuthenticated:false, isLoading:false})
-                } catch (error:any) {
-                    const message= error.response?.data?.error;
-                    set({error:message,isLoading:false})
-                }
-            },
+//             register:async(name,email, password) =>{
+//                 try {
+//                     set({error:null,isLoading:true});
+//                     const {data}= await api.post("/auth/register", {name,email,password})
+//                     set({user:data.user, isAuthenticated:true, isLoading:false})
+//                 } catch (error:any) {
+//                     const message= error.response?.data?.error;
+//                     set({error:message,isLoading:false})
+//                 }
+//             },
 
-            userProfile: async() => {
-                  try {
-                    set({error:null,isLoading:true});
-                    const {data}= await api.get("/auth/me")
-                    set({ user:data.user,isAuthenticated:true, isLoading:false})
-                } catch (error:any) {
-                    const message= error.response?.data?.error;
-                    set({error:message,isLoading:false})
-                }
-            },
 
-            setUser:(user) => set({user, isAuthenticated:true}),
-            setError:(error) => set({error}),
+//                         logout:async() =>{
+//                 try {
+//                     set({error:null,isLoading:true});
+//                     const {data}= await api.post("/auth/logout", {})
+//                     set({ user:null,isAuthenticated:false, isLoading:false})
+//                 } catch (error:any) {
+//                     const message= error.response?.data?.error;
+//                     set({error:message,isLoading:false})
+//                 }
+//             },
 
-        }),
-        {
-            name:"user-storage",
-            partialize: (state) => ({
-                user:state.user,
-                isAuthenticated:state.isAuthenticated
-            })
+//             userProfile: async() => {
+//                   try {
+//                     set({error:null,isLoading:true});
+//                     const {data}= await api.get("/auth/me")
+//                     set({ user:data.user,isAuthenticated:true, isLoading:false})
+//                 } catch (error:any) {
+//                     const message= error.response?.data?.error;
+//                     set({error:message,isLoading:false})
+//                 }
+//             },
+
+//             setUser:(user) => set({user, isAuthenticated:true}),
+//             setError:(error) => set({error}),
+
+//         }),
+//         {
+//             name:"user-storage",
+//             partialize: (state) => ({
+//                 user:state.user,
+//                 isAuthenticated:state.isAuthenticated
+//             })
+//         }
+//     )
+// )
+
+
+
+export const userAuthStore = create<AuthState>()(
+  persist(
+    (set, get) => ({
+      user: null,
+      isAuthenticated: false,
+      isLoading: false,
+      error: null,
+
+      login: async (email, password) => {
+        try {
+          set({ error: null, isLoading: true });
+          const { data } = await api.post("/auth/login", { email, password });
+          set({ user: data.user, isAuthenticated: true, isLoading: false });
+        } catch (error: any) {
+          const message = error.response?.data?.error;
+          set({ error: message, isLoading: false });
         }
-    )
-)
+      },
+
+      register: async (name, email, password) => {
+        try {
+          set({ error: null, isLoading: true });
+          const { data } = await api.post("/auth/register", { name, email, password });
+          set({ user: data.user, isAuthenticated: true, isLoading: false });
+        } catch (error: any) {
+          const message = error.response?.data?.error;
+          set({ error: message, isLoading: false });
+        }
+      },
+
+      logout: async () => {
+        try {
+          set({ error: null, isLoading: true });
+          await api.post("/auth/logout", {});
+          set({ user: null, isAuthenticated: false, isLoading: false });
+        } catch (error: any) {
+          const message = error.response?.data?.error;
+          set({ error: message, isLoading: false });
+        }
+      },
+
+      userProfile: async () => {
+        try {
+          set({ error: null, isLoading: true });
+          const { data } = await api.get("/auth/me");
+          console.log("✅ User profile:", data.user);
+          set({ user: data.user, isAuthenticated: true, isLoading: false });
+        } catch (error: any) {
+          console.log("❌ Failed to fetch user", error);
+          const message = error.response?.data?.error;
+          set({ error: message, isLoading: false });
+        }
+      },
+
+      setUser: (user) => set({ user, isAuthenticated: true }),
+      setError: (error) => set({ error }),
+    }),
+    {
+      name: "user-storage",
+      skipHydration: true,
+      partialize: (state) => ({
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+      }),
+    }
+  )
+);
