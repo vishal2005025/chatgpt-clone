@@ -119,29 +119,28 @@ exports.getCurrentUser = async (req, res) => {
   }
 };
 
-// exports.googleCallback = async (req, res) => {
-//   try {
-//     const token = jwt.sign(
-//       { id: req.user._id, email: req.user.email },
-//       process.env.JWT_SECRET,
-//       { expiresIn: "30d" }
-//     );
-//     res.cookie("auth_token", token, {
-//       httpOnly: true,
-//       sameSite: "None",
-//       secure: true,
-//     });
+exports.googleCallback = async (req, res) => {
+  try {
+    const token = jwt.sign(
+      { id: req.user._id, email: req.user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "30d" }
+    );
+    res.cookie("auth_token", token, {
+      httpOnly: true,
+      sameSite: "None",
+      secure: true,
+    });
 
-//     res.redirect(`${process.env.FRONTEND_URL}/auth/success-login?token=${token}`);
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
+    res.redirect(`${process.env.FRONTEND_URL}/auth/success-login?token=${token}`);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 
 
-//set timeout to ensure cookie is written before redirecting
-
+// //set timeout to ensure cookie is written before redirecting
 // exports.googleCallback = async (req, res) => {
 //   try {
 //     const token = jwt.sign(
@@ -164,30 +163,3 @@ exports.getCurrentUser = async (req, res) => {
 //     res.status(500).json({ error: error.message });
 //   }
 // };
-
-
-
-
-
-exports.googleCallback = async (req, res) => {
-  try {
-    const token = jwt.sign(
-      { id: req.user._id, email: req.user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: "30d" }
-    );
-
-    res.cookie("auth_token", token, {
-      httpOnly: true,
-      sameSite: "None",
-      secure: true,
-    });
-
-    // Delay the redirect by 1 second to allow cookie registration
-    setTimeout(() => {
-      res.redirect(`${process.env.FRONTEND_URL}/`);
-    }, 1000);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
