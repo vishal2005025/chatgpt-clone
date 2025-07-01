@@ -6,7 +6,7 @@ import React, { useRef, useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
 import { Loader } from "../../Loader";
 import Markdown from "../Markdown";
-import { Copy, ThumbsDown, ThumbsUp, Pencil } from "lucide-react";
+import { Copy, ThumbsDown, ThumbsUp, Pencil, Volume2, Share } from "lucide-react";
 import toast from "react-hot-toast";
 import { useChatStore } from "@/store/chatStore";
 import { Button } from "../button";
@@ -200,6 +200,28 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] border-none cursor-pointer "
           >
             <ThumbsDown
+              className="h-5 w-5 text-[#5c5c5c] cursor-pointer"
+              onClick={() => toast.success("unliked")}
+            />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] border-none cursor-pointer "
+          >
+            <Volume2
+              className="h-5 w-5 scale-110 text-[#5c5c5c] cursor-pointer"
+              onClick={() => toast.success("unliked")}
+            />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] border-none cursor-pointer "
+          >
+            <Share
               className="h-5 w-5 text-[#5c5c5c] cursor-pointer"
               onClick={() => toast.success("unliked")}
             />

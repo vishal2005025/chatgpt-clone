@@ -284,7 +284,7 @@ const currentChat = chats.find((chat: any) => chat._id === currentChatId);
 
   return (
     <>
-      <div className="md:hidden fixed top-0 z-50 flex h-16 w-full items-center justify-between border-b bg-[#fafafa] px-4">   
+      <div className="md:hidden fixed top-0 z-50 flex h-16 w-full items-center justify-between border-b bg-[#ffffff] px-4">   
       <Sheet >
         <SheetTrigger asChild>
           <Button variant="ghost" size="icon" className="w-6 cursor-pointer">

@@ -119,6 +119,25 @@ exports.getCurrentUser = async (req, res) => {
   }
 };
 
+// exports.googleCallback = async (req, res) => {
+//   try {
+//     const token = jwt.sign(
+//       { id: req.user._id, email: req.user.email },
+//       process.env.JWT_SECRET,
+//       { expiresIn: "30d" }
+//     );
+//     res.cookie("auth_token", token, {
+//       httpOnly: true,
+//       sameSite: "None",
+//       secure: true,
+//     });
+
+//     res.redirect(`${process.env.FRONTEND_URL}/auth/success-login?token=${token}`);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
 exports.googleCallback = async (req, res) => {
   try {
     const token = jwt.sign(
@@ -126,13 +145,17 @@ exports.googleCallback = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "30d" }
     );
+
     res.cookie("auth_token", token, {
       httpOnly: true,
       sameSite: "None",
       secure: true,
     });
 
-    res.redirect(`${process.env.FRONTEND_URL}/auth/success-login?token=${token}`);
+    // Delay redirect to ensure cookie is written
+    setTimeout(() => {
+      res.redirect(`${process.env.FRONTEND_URL}/auth/success-login?token=${token}`);
+    }, 300);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
