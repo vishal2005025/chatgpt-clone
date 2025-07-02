@@ -19,17 +19,17 @@ const page = () => {
   const router = useRouter();
   const {isLoading,login} = userAuthStore();
 
-   const handleSubmit =  async(e:React.FormEvent) => {
-    e.preventDefault();
-    try {
-        await login(email,password)
-        toast.success("user login successfully")
-        router.push('/')
-    } catch (error:any) {
-      console.log(error)
-      toast.error(error || "error during login")
-    }
+   const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  const success = await login(email, password);
+  if (success) {
+    toast.success("User login successfully");
+    router.push("/");
+  } else {
+    toast.error("Invalid email or password");
   }
+};
+
 
   
   const handleGoogleLogin = () => {
