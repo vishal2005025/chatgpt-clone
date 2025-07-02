@@ -139,27 +139,3 @@ exports.googleCallback = async (req, res) => {
 };
 
 
-
-// //set timeout to ensure cookie is written before redirecting
-// exports.googleCallback = async (req, res) => {
-//   try {
-//     const token = jwt.sign(
-//       { id: req.user._id, email: req.user.email },
-//       process.env.JWT_SECRET,
-//       { expiresIn: "30d" }
-//     );
-
-//     res.cookie("auth_token", token, {
-//       httpOnly: true,
-//       sameSite: "None",
-//       secure: true,
-//     });
-
-//     // Delay redirect to ensure cookie is written
-//     setTimeout(() => {
-//       res.redirect(`${process.env.FRONTEND_URL}/auth/success-login?token=${token}`);
-//     }, 300);
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
