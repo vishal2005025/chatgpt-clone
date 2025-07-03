@@ -16,6 +16,10 @@ The title must summarize the main topic in 3–8 words. Always include the [TITL
 
 //  List of fallback models (adjust based on vision capability)
 const FALLBACK_MODELS = [
+ "meta-llama/llama-3.2-11b-vision-instruct:free", // Vision capable
+//  "moonshotai/kimi-vl-a3b-thinking:free", // Vision capable
+//   "google/gemma-3-27b-it:free", // Vision capable
+//   "openchat/openchat-3.5-vision:free", // Vision capable
   "mistralai/mistral-7b-instruct", // No vision
   "openchat/openchat-3.5-0106", // No vision
   "meta-llama/llama-3-8b-instruct", // No vision
