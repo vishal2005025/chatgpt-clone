@@ -16,6 +16,8 @@ import {
 import { cn } from "@/lib/utils";
 import { useChatStore } from "@/store/chatStore";
 
+
+
 interface ChatInputProps {
   onSubmit: (message: string) => void;
   isLoading: boolean;
@@ -154,7 +156,7 @@ const ChatInput = ({ onSubmit, isLoading }: ChatInputProps) => {
               <button
                 onClick={() => removeImage(index)}
                 aria-label={`Remove uploaded image ${index + 1}`}
-                className="absolute top-0 right-0 text-m rounded-full px-0 hover:[background-color:#ebebeb] cursor-pointer"
+                className="absolute top-0 right-0 text-m text-white rounded-full px-0 bg-black  cursor-pointer"
               >
                 <X size={24} />
               </button>
@@ -229,7 +231,7 @@ const ChatInput = ({ onSubmit, isLoading }: ChatInputProps) => {
             >
               <GitCommitHorizontal className="h-full scale-120" strokeWidth={1.5} />
               <GitCommitHorizontal className="h-full scale-120" strokeWidth={1.5} />
-            </Button>
+            </Button>    
           </div>
 
           <div className="flex gap-2">

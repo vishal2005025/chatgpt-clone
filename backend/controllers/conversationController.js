@@ -1,6 +1,6 @@
 const Chat = require("../models/Chat");
 const Conversation = require("../models/Conversation");
-const CachedResponse = require("../models/CachedResponse");
+const CachedResponse = require("../models/CachedResponse"); // ✅ New Model
 const { generateStreamResponse } = require("../aiProvider/chatgpt-ai");
 const { encode } = require("gpt-3-encoder");
 const { MemoryClient } = require("mem0ai");
@@ -58,13 +58,13 @@ exports.sendMessage = async (req, res) => {
       return res.end();
     }
 
-    // Parallel fetch
+    // Parallel fetch: conversation + memory
     const [conversationRaw, memResults] = await Promise.all([
       Conversation.findOne({ chatId }),
       memory.search(message.content, {
         user_id: req.user.id.toString(),
         version: "v2",
-        limit: 2,
+        limit: 3,
       }),
     ]);
 
@@ -72,7 +72,7 @@ exports.sendMessage = async (req, res) => {
 
     const userMessage = { role: "user", content: message.content };
     conversation.messages.push(userMessage);
-    chat.updatedAt = Date.now();
+    chat.updatedAt = Date.now(); // prepare to save after generation
 
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
@@ -94,38 +94,11 @@ Always end your first response with a descriptive chat title like:
         content: m.memory,
       }));
 
-      // ✅ Summarize older memory from conversation
-      const allMessages = [...conversation.messages].filter((m) => m.role !== "system");
-      const recent = allMessages.slice(-4);
-      const old = allMessages.slice(0, -4);
+      const recentMessages = [...conversation.messages]
+        .filter((m) => m.role !== "system")
+        .slice(-6);
 
-      let summaryBlock = [];
-
-      if (old.length > 0) {
-        try {
-          const summary = await memory.summarize(old.map((m) => ({
-            role: m.role,
-            content: m.content
-          })));
-
-          if (summary?.summary) {
-            summaryBlock.push({
-              role: "system",
-              content: `Summary of earlier conversation: ${summary.summary}`
-            });
-          }
-        } catch (e) {
-          console.warn("⚠️ Summary failed (fallback to no summary):", e.message);
-        }
-      }
-
-      let messagesToSend = [
-        systemMessage,
-        ...summaryBlock,
-        ...memoryContext,
-        ...recent
-      ];
-
+      let messagesToSend = [systemMessage, ...memoryContext, ...recentMessages];
       messagesToSend = trimMessagesToFit(messagesToSend, MAX_TOKENS);
 
       assistantResponse = await generateStreamResponse(messagesToSend, (chunk) => {
@@ -150,6 +123,7 @@ Always end your first response with a descriptive chat title like:
         }
       );
 
+      // ✅ Save to cache
       await CachedResponse.create({
         userId: req.user.id.toString(),
         prompt: message.content.trim(),
