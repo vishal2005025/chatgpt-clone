@@ -15,7 +15,6 @@ const Conversations = ({ id }: { id: string }) => {
     messages,
     isLoading,
     isAiLoading,
-    isUserLoading,
     fetchChat,
     sendMessage,
   } = useChatStore();
@@ -47,7 +46,7 @@ const Conversations = ({ id }: { id: string }) => {
       sendMessage(id, initialMessage);
       hasSentRef.current = true;
 
-      //Remove message from search params
+      // Remove message from search params
       const current = new URLSearchParams(window.location.search);
       current.delete("message");
       const newUrl = `${window.location.pathname}?${current.toString()}`;
@@ -95,23 +94,24 @@ const Conversations = ({ id }: { id: string }) => {
                   </p>
                 </div>
               ) : (
-                messages.map((message, index) => (
-                  <ChatMessage
-                    key={index}
-                    index={index}
-                    message={message}
-                    isUserLoading={
-                      isUserLoading &&
-                      index === messages.length - 2 &&
-                      message.role === "user"
-                    }
-                    isAiLoading={
-                      isAiLoading &&
-                      index === messages.length - 1 &&
-                      message.role === "assistant"
-                    }
-                  />
-                ))
+                messages.map((message, index) => {
+                  const isLast = index === messages.length - 1;
+
+                  const isAiLoadingActive =
+                    isAiLoading &&
+                    message.role === "assistant" &&
+                    isLast;
+
+                  return (
+                    <ChatMessage
+                      key={index}
+                      index={index}
+                      message={message}
+                      isAiLoading={isAiLoadingActive}
+                    />
+                  );
+                })
+
               )}
               <div ref={messagesEndRef} />
             </div>

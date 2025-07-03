@@ -5,13 +5,19 @@
 const axios = require("axios");
 const https = require("https");
 
-const DEFAULT_SYSTEM_MESSAGE =
-  "You are ChatGpt, a helpful AI assistant. You provide accurate, informative, and friendly responses. Always be respectful, helpful, and concise in your responses. After your first message, also include a suitable chat title (in 3-8 words) in the format: [TITLE: Your generated title here].";
+const DEFAULT_SYSTEM_MESSAGE = `
+You are ChatGpt, a helpful AI assistant. You provide accurate, informative, and concise responses.
+
+Always end your first response with a descriptive chat title in this format:
+[TITLE: your title here]
+
+The title must summarize the main topic in 3–8 words. Always include the [TITLE: ...] even if the prompt is short.
+`;
 
 //  List of fallback models (adjust based on vision capability)
 const FALLBACK_MODELS = [
-  "openchat/openchat-3.5-0106", // No vision
   "mistralai/mistral-7b-instruct", // No vision
+  "openchat/openchat-3.5-0106", // No vision
   "meta-llama/llama-3-8b-instruct", // No vision
   "gryphe/mythomax-l2-13b" // No vision
   // You can add gpt-4-vision-preview (paid) if needed

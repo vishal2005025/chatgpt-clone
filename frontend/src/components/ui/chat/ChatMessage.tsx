@@ -6,7 +6,14 @@ import React, { useRef, useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
 import { Loader } from "../../Loader";
 import Markdown from "../Markdown";
-import { Copy, ThumbsDown, ThumbsUp, Pencil, Volume2, Share } from "lucide-react";
+import {
+  Copy,
+  ThumbsDown,
+  ThumbsUp,
+  Pencil,
+  Volume2,
+  Share,
+} from "lucide-react";
 import toast from "react-hot-toast";
 import { useChatStore } from "@/store/chatStore";
 import { Button } from "../button";
@@ -18,7 +25,6 @@ interface ChatMessageProps {
     comment?: string;
   };
   index: number;
-  isUserLoading?: boolean;
   isAiLoading?: boolean;
 }
 
@@ -26,7 +32,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   message,
   index,
   isAiLoading,
-  isUserLoading,
 }) => {
   const { user } = userAuthStore();
   const { updateUserMessage, sendMessage, currentChat } = useChatStore();
@@ -68,6 +73,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         message.role === "user" ? "bg-[#f5f5f5] mt-10" : "bg-muted/50",
         "mb-4 relative"
       )}
+      role="listitem"
     >
       <Avatar className="h-8 w-8">
         {message.role === "user" ? (
@@ -84,19 +90,22 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       </Avatar>
 
       <div className="flex-1 space-y-2">
-        {message.role === "user" && isUserLoading ? (
-          <Loader type="user" position="left" className="mr-2" />
-        ) : message.role === "assistant" && isAiLoading ? (
+        { message.role === "assistant" && isAiLoading ? (
           <Loader type="ai" />
         ) : isEditing ? (
-          <div className="w-full">
+          <div className="w-full" aria-live="polite">
             <textarea
               ref={editRef}
               className="w-full text-m rounded-md p-1 border-none resize-none overflow-y-auto max-h-52 custom-scrollbar"
               rows={1}
               value={editedContent}
               onChange={(e) => setEditedContent(e.target.value)}
+              aria-label="Edit message"
+              aria-describedby={`editing-msg-${index}`}
             />
+            <span id={`editing-msg-${index}`} className="sr-only">
+              Editing message content
+            </span>
             <div className="mt-0 flex justify-end gap-2">
               <button
                 onClick={handleCancel}
@@ -113,7 +122,11 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             </div>
           </div>
         ) : (
-          <div className="prose prose-sm max-w-none space-y-2">
+          <div
+            className="prose prose-sm max-w-none space-y-2"
+            role={message.role === "assistant" ? "log" : undefined}
+            aria-live={message.role === "assistant" ? "polite" : undefined}
+          >
             {message.content.split("\n").map((line, i) => {
               const trimmed = line.trim();
               const isImage = /^https?:\/\/.*\.(jpeg|jpg|gif|png|webp|svg|bmp|tiff)(\?.*)?$/.test(
@@ -126,7 +139,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                   <img
                     key={i}
                     src={trimmed}
-                    alt="Uploaded"
+                    alt="Uploaded image"
                     className="max-w-xs rounded-xl border"
                   />
                 );
@@ -151,80 +164,81 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       </div>
 
       {message.role === "user" && !isEditing ? (
-        <div className="absolute right-0 -bottom-10 flex gap-0 opacity-0 group-hover:opacity-100 transition-opacity ">
+        <div className="absolute right-0 -bottom-10 flex gap-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
           <Button
             type="button"
+            aria-label="Copy message"
             variant="ghost"
             size="icon"
             onClick={() => handleCopy(message.content)}
-            className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] border-none cursor-pointer "
+            className="h-9 w-9 rounded-full border border-none cursor-pointer opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:[background-color:#ebebeb] active:bg-[#ebebeb] focus-visible:outline focus-visible:outline-2 focus-visible:outline-black"
           >
-            <Copy className="h-5 w-5 text-[#5c5c5c] cursor-pointer " />
+            <Copy className="h-5 w-5 text-[#5c5c5c]" />
           </Button>
+
           <Button
             type="button"
+            aria-label="Edit message"
             variant="ghost"
             size="icon"
             onClick={handleEdit}
-            className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] border-none cursor-pointer "
+            className="h-9 w-9 rounded-full border border-none cursor-pointer opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:[background-color:#ebebeb] active:bg-[#ebebeb] focus-visible:outline focus-visible:outline-2 focus-visible:outline-black"
           >
-            <Pencil className="h-5 w-5 text-[#5c5c5c] cursor-pointer" />
+            <Pencil className="h-5 w-5 text-[#5c5c5c]" />
           </Button>
+
         </div>
       ) : message.role !== "user" ? (
         <div className="absolute left-4 -bottom-10 flex gap-0">
           <Button
             type="button"
+            aria-label="Copy message"
             variant="ghost"
             size="icon"
             onClick={() => handleCopy(message.content)}
-            className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] border-none cursor-pointer "
+            className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] focus-visible:outline focus-visible:outline-2 focus-visible:outline-black border-none cursor-pointer"
           >
-            <Copy className="h-5 w-5 text-[#5c5c5c] cursor-pointer" />
+            <Copy className="h-5 w-5 text-[#5c5c5c]" />
           </Button>
           <Button
             type="button"
+            aria-label="Like message"
             variant="ghost"
             size="icon"
-            className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] border-none cursor-pointer "
+            onClick={() => toast.success("liked")}
+            className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] focus-visible:outline focus-visible:outline-2 focus-visible:outline-black border-none cursor-pointer"
           >
-            <ThumbsUp
-              className="h-5 w-5 text-[#5c5c5c] cursor-pointer"
-              onClick={() => toast.success("liked")}
-            />
+            <ThumbsUp className="h-5 w-5 text-[#5c5c5c]" />
           </Button>
           <Button
             type="button"
+            aria-label="Dislike message"
             variant="ghost"
             size="icon"
-            className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] border-none cursor-pointer "
+            onClick={() => toast.success("unliked")}
+            className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] focus-visible:outline focus-visible:outline-2 focus-visible:outline-black border-none cursor-pointer"
           >
-            <ThumbsDown
-              className="h-5 w-5 text-[#5c5c5c] cursor-pointer"
-              onClick={() => toast.success("unliked")}
-            />
+            <ThumbsDown className="h-5 w-5 text-[#5c5c5c]" />
           </Button>
           <Button
             type="button"
+            aria-label="Read message aloud"
             variant="ghost"
             size="icon"
-            className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] border-none cursor-pointer "
+            onClick={() => toast.success("unliked")}
+            className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] focus-visible:outline focus-visible:outline-2 focus-visible:outline-black border-none cursor-pointer"
           >
-            <Volume2
-              className="h-5 w-5 scale-110 text-[#5c5c5c] cursor-pointer"
-              onClick={() => toast.success("unliked")}
-            />
+            <Volume2 className="h-5 w-5 scale-110 text-[#5c5c5c]" />
           </Button>
           <Button
             type="button"
+            aria-label="Share message"
             variant="ghost"
             size="icon"
-            className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] border-none cursor-pointer "
+            onClick={() => toast.success("unliked")}
+            className="h-9 w-9 rounded-full border hover:[background-color:#ebebeb] focus-visible:outline focus-visible:outline-2 focus-visible:outline-black border-none cursor-pointer"
           >
-            <Share
-              className="h-5 w-5 text-[#5c5c5c] cursor-pointer"
-              onClick={() => toast.success("unliked")}
-            />
+            <Share className="h-5 w-5 text-[#5c5c5c]" />
           </Button>
         </div>
       ) : null}
@@ -233,5 +247,3 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
 };
 
 export default ChatMessage;
-
-
