@@ -1,6 +1,6 @@
 # 🧠 ChatGPT Clone – Full-Stack AI Assistant
 
-A pixel-perfect, fully functional **ChatGPT clone** built with **Next.js**, **TypeScript**, **Vercel AI SDK**, **OpenAI** and **MongoDB**. Includes AI-powered image + text understanding, streaming responses, persistent chat memory, authentication, and more — 
+A pixel-perfect, fully functional **ChatGPT clone** built with **Next.js**, **TypeScript**, **Shadcn UI**, **Vercel AI SDK**, **OpenAI**, **Mem0AI**, **Cloudniary** and **MongoDB**. Includes AI-powered image + text understanding, streaming responses, persistent chat memory, memory capability, context window handling and authentication, more — 
 ---
 
 ## ✨ Features
@@ -90,18 +90,20 @@ cd chatgpt-clone
 NEXT_PUBLIC_API_URL=http://localhost:8000/api
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
 NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=your_upload_preset
-NEXT_PUBLIC_MEM0_API_KEY=your_mem0_key
-NEXT_PUBLIC_OPENROUTER_API_KEY=your_openrouter_key
 ```
 
 #### ➤ Backend (`backend/.env`)
 ```env
+PORT=8000
+FRONTEND_URL=http://localhost:3000
+BACKEND_URL=http://localhost:8000
 MONGO_URI=mongodb+srv://your_uri
 JWT_SECRET=your_jwt_secret
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_secret
-FRONTEND_URL=http://localhost:3000
+MEM0_API_KEY=your_mem0_key
+GOOGLE_CLIENT_ID=your_google_client_id_key
+GOOGLE_CLIENT_SECRET=your_google_client_secret_key
+OPENROUTER_API_KEY=your_openrouter_key
+OPENAI_API_KEY=your_openai_key
 ```
 
 ---
@@ -111,7 +113,7 @@ FRONTEND_URL=http://localhost:3000
 ```bash
 cd backend
 npm install
-npm start
+npm run dev
 ```
 
 Runs on: `http://localhost:8000`
