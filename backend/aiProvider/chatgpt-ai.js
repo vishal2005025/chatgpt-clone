@@ -1,3 +1,7 @@
+//for image based response 
+
+
+
 const axios = require("axios");
 const https = require("https");
 
@@ -10,39 +14,38 @@ Always end your first response with a descriptive chat title in this format:
 The title must summarize the main topic in 3–8 words. Always include the [TITLE: ...] even if the prompt is short.
 `;
 
-// ✅ Split model lists
-const VISION_MODELS = [
-  "moonshotai/kimi-vl-a3b-thinking:free",  // Vision capable
-  "meta-llama/llama-3.2-11b-vision-instruct:free", // Vision capable
-  "google/gemma-3-27b-it:free", // Vision capable
-  "openchat/openchat-3.5-vision:free", // Vision capable
-];
-
-const TEXT_MODELS = [
+//  List of fallback models (adjust based on vision capability)
+const FALLBACK_MODELS = [
+//  "meta-llama/llama-3.2-11b-vision-instruct:free", // Vision capable
+ // "moonshotai/kimi-vl-a3b-thinking:free", // Vision capable
+//   "google/gemma-3-27b-it:free", // Vision capable
+//   "openchat/openchat-3.5-vision:free", // Vision capable
   "mistralai/mistral-7b-instruct", // No vision
-  "meta-llama/llama-3-8b-instruct",  // No vision
   "openchat/openchat-3.5-0106", // No vision
-  "gryphe/mythomax-l2-13b",
+  "meta-llama/llama-3-8b-instruct", // No vision
+  "gryphe/mythomax-l2-13b" // No vision
   // You can add gpt-4-vision-preview (paid) if needed
 ];
 
-// ✅ Detect if user input includes image
+//  Helper: Detects Cloudinary (or similar) image links
 function isImageUrl(url) {
-  return /^https?:\/\/.*\.(jpeg|jpg|gif|png|webp|svg|bmp|tiff)(\?.*)?$/i.test(url);
+  return /^https?:\/\/.*\.(jpeg|jpg|gif|png|webp)$/i.test(url);
 }
 
-// ✅ Format for OpenRouter with vision support
+//  Formats messages for OpenRouter (supporting vision model syntax)
 function formatMessages(messages) {
-  return messages.map((msg) => {
+  return messages.map(msg => {
     if (isImageUrl(msg.content)) {
       return {
         role: msg.role,
         content: [
           {
             type: "image_url",
-            image_url: { url: msg.content },
-          },
-        ],
+            image_url: {
+              url: msg.content
+            }
+          }
+        ]
       };
     }
 
@@ -54,24 +57,13 @@ function formatMessages(messages) {
         role: msg.role,
         content: [
           ...(text ? [{ type: "text", text }] : []),
-          { type: "image_url", image_url: { url } },
-        ],
+          { type: "image_url", image_url: { url } }
+        ]
       };
     }
 
     return msg; // plain text
   });
-}
-
-// ✅ Pick models dynamically
-function selectModelList(messages) {
-  const hasImage = messages.some((msg) => {
-    return (
-      isImageUrl(msg.content) ||
-      /(https?:\/\/.*\.(png|jpg|jpeg|gif|webp))/i.test(msg.content)
-    );
-  });
-  return hasImage ? VISION_MODELS : TEXT_MODELS;
 }
 
 async function tryModel(model, messages, onChunk) {
@@ -99,11 +91,7 @@ async function tryModel(model, messages, onChunk) {
       let fullResponse = "";
 
       response.data.on("data", (chunk) => {
-        const lines = chunk
-          .toString()
-          .split("\n")
-          .filter((line) => line.trim() !== "");
-
+        const lines = chunk.toString().split("\n").filter((line) => line.trim() !== "");
         for (const line of lines) {
           if (line.startsWith("data:")) {
             const dataStr = line.replace(/^data:\s*/, "");
@@ -145,15 +133,12 @@ async function tryModel(model, messages, onChunk) {
   });
 }
 
-// ✅ Main function: tries appropriate models
 async function generateStreamResponse(messages, onChunk) {
   if (!messages.some((msg) => msg.role === "system")) {
     messages = [{ role: "system", content: DEFAULT_SYSTEM_MESSAGE }, ...messages];
   }
 
-  const modelsToTry = selectModelList(messages);
-
-  for (const model of modelsToTry) {
+  for (const model of FALLBACK_MODELS) {
     try {
       console.log(`🔄 Trying model: ${model}`);
       const result = await tryModel(model, messages, onChunk);
@@ -168,6 +153,10 @@ async function generateStreamResponse(messages, onChunk) {
 }
 
 module.exports = { generateStreamResponse };
+
+
+
+
 
 
 
@@ -287,4 +276,3 @@ module.exports = { generateStreamResponse };
 // }
 
 // module.exports = { generateStreamResponse };
-
